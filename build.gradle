@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile "junit:junit:[4,5)"
+
+    //WebSockets
+    compile 'javax.websocket:javax.websocket-api:1.0'
+    compile 'org.glassfish.tyrus:tyrus-client:1.3.3'
+    compile 'org.glassfish.tyrus:tyrus-server:1.3.3'
+    compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.2.1'
+
+    compile "com.google.code.gson:gson:2.2.4"
+
+    compile "org.slf4j:slf4j-api:[1.7,1.8)"
+    compile "org.slf4j:slf4j-simple:[1.7,1.8)"
+}

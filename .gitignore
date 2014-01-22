@@ -1,0 +1,16 @@
+*.class
+build/classes/
+build/dependency-cache/
+build/docs/
+build/poms/
+build/reports/
+build/resources/
+build/tests/
+build/test-results/
+build/tmp/
+build/ivy.xml
+bin/
+.gradle
+
+.idea/*
+*.iml
