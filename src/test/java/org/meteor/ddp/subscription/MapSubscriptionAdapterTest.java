@@ -11,10 +11,10 @@ import java.util.Map;
 
 public class MapSubscriptionAdapterTest {
 
-    private Map<String, Map<String, Object>> localData = new HashMap<>();
-
     @Test
     public void testAdded() throws Exception {
+
+        final Map<String, Map<String, Object>> localData = new HashMap<>();
 
         final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
 
@@ -49,6 +49,8 @@ public class MapSubscriptionAdapterTest {
 
     @Test
     public void testRemoved() throws Exception {
+
+        final Map<String, Map<String, Object>> localData = new HashMap<>();
 
         final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
 

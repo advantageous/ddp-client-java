@@ -18,7 +18,7 @@ public class MessageConverterJson implements MessageConverter {
     @Override
     public Object fromDDP(final String rawMessage) throws UnsupportedMessageException {
         final Map jsonMap = GSON.fromJson(rawMessage, HashMap.class);
-        Object msg = jsonMap.get("msg");
+        final Object msg = jsonMap.get("msg");
         if (msg != null) {
             final String ddpMessageType = msg.toString();
             final Class messageClass = MessageRegistry.get(ddpMessageType);
@@ -30,8 +30,8 @@ public class MessageConverterJson implements MessageConverter {
 
     @Override
     public String toDDP(final Object object) {
-        String json = GSON.toJson(object, object.getClass());
-        StringBuilder buffer = new StringBuilder(json);
+        final String json = GSON.toJson(object, object.getClass());
+        final StringBuilder buffer = new StringBuilder(json);
         buffer.insert(1, "\"msg\":\"" + MessageRegistry.get(object.getClass()) + "\",");
         return buffer.toString();
     }
