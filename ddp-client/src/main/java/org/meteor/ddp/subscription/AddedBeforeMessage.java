@@ -50,4 +50,14 @@ public class AddedBeforeMessage {
     public void setBefore(String before) {
         this.before = before;
     }
+
+    @Override
+    public String toString() {
+        return "AddedBeforeMessage{" +
+                "collection='" + collection + '\'' +
+                ", id='" + id + '\'' +
+                ", fields=" + fields +
+                ", before='" + before + '\'' +
+                '}';
+    }
 }

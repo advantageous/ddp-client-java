@@ -46,17 +46,35 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
     @MessageHandler(AddedBeforeMessage.class)
     public void handleAddedBefore(final AddedBeforeMessage message) {
-        //TODO: Implement
+        if (WARN) LOGGER.debug("received AddedBefore message.  The basic map subscription adapter does not support " +
+                "ordering in collections.  The item will be treated as a regular Added event.", message);
+        final AddedMessage addedMessage = new AddedMessage();
+        addedMessage.setFields(message.getFields());
+        addedMessage.setCollection(message.getCollection());
+        addedMessage.setId(message.getId());
+        this.handleAdded(addedMessage);
     }
 
     @MessageHandler(ChangedMessage.class)
     public void handleChanged(final ChangedMessage message) {
-        //TODO: Implement
+        if (DEBUG) LOGGER.debug("got changed message: " + message);
+        Map<String, Object> localCollection = dataMap.get(message.getCollection());
+        if (localCollection == null) {
+            localCollection = new HashMap<>();
+            dataMap.put(message.getCollection(), localCollection);
+        }
+
+        final Object record = localCollection.get(message.getId());
+
+
+
+        localCollection.put(message.getId(), message.getFields());
     }
 
     @MessageHandler(MovedBeforeMessage.class)
     public void handleMovedBefore(final MovedBeforeMessage message) {
-        //TODO: Implement
+        if (WARN) LOGGER.debug("received MovedBefore message.  The basic map subscription adapter does not support " +
+                "ordering in collections.  This message will be ignored.", message);
     }
 
     @MessageHandler(RemovedMessage.class)
