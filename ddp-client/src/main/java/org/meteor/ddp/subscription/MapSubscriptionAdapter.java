@@ -46,7 +46,7 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
     @MessageHandler(AddedBeforeMessage.class)
     public void handleAddedBefore(final AddedBeforeMessage message) {
-        if (WARN) LOGGER.debug("received AddedBefore message.  The basic map subscription adapter does not support " +
+        if (WARN) LOGGER.warn("received AddedBefore message.  The basic map subscription adapter does not support " +
                 "ordering in collections.  The item will be treated as a regular Added event.", message);
         final AddedMessage addedMessage = new AddedMessage();
         addedMessage.setFields(message.getFields());
@@ -73,7 +73,7 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
     @MessageHandler(MovedBeforeMessage.class)
     public void handleMovedBefore(final MovedBeforeMessage message) {
-        if (WARN) LOGGER.debug("received MovedBefore message.  The basic map subscription adapter does not support " +
+        if (WARN) LOGGER.warn("received MovedBefore message.  The basic map subscription adapter does not support " +
                 "ordering in collections.  This message will be ignored.", message);
     }
 
