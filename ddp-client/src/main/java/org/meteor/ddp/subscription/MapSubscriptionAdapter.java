@@ -30,7 +30,6 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
                                   final Map<String, Map<String, Object>> dataMap) {
         super(webSocketClient);
         this.dataMap = dataMap;
-        this.webSocketClient.registerHandler(this);
     }
 
     @MessageHandler(AddedMessage.class)

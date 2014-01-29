@@ -11,6 +11,8 @@ import java.util.Map;
 
 public class MapSubscriptionAdapterTest {
 
+    public static final String SERVER_ADDRESS = "ws://192.168.1.104:3200/websocket";
+
     @Test
     public void testAdded() throws Exception {
 
@@ -23,7 +25,7 @@ public class MapSubscriptionAdapterTest {
         client.registerHandler(new Object() {
 
             @MessageHandler(ConnectedMessage.class)
-            private void handleConnected(ConnectedMessage message) throws IOException {
+            public void handleConnected(ConnectedMessage message) throws IOException {
 
                 subscriptionAdapter.subscribe("tabs", null, new SubscriptionCallback() {
                     @Override
@@ -44,7 +46,7 @@ public class MapSubscriptionAdapterTest {
             }
         });
 
-        client.connect("ws://192.168.1.110:3200/websocket");
+        client.connect(SERVER_ADDRESS);
     }
 
     @Test
@@ -84,7 +86,7 @@ public class MapSubscriptionAdapterTest {
             }
         });
 
-        client.connect("ws://192.168.1.110:3200/websocket");
+        client.connect(SERVER_ADDRESS);
     }
 
 }

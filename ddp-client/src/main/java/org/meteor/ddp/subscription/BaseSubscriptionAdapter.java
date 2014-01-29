@@ -51,7 +51,7 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
     }
 
     @MessageHandler(ReadyMessage.class)
-    protected void handleReady(final ReadyMessage message) {
+    public void handleReady(final ReadyMessage message) {
         for (final String sub : message.getSubs()) {
             final SubscriptionCallback callback = callbackMap.get(sub);
             if (callback != null) {
@@ -62,7 +62,7 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
     }
 
     @MessageHandler(NoSubscriptionMessage.class)
-    protected void handleNoSub(final NoSubscriptionMessage message) {
+    public void handleNoSub(final NoSubscriptionMessage message) {
         final SubscriptionCallback callback = callbackMap.get(message.getId());
         if (callback != null) {
             callback.onFailure(message.getId(), message.getError());

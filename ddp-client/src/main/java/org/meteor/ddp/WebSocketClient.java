@@ -98,8 +98,8 @@ public class WebSocketClient {
     @OnMessage
     public void onMessage(final String rawMessage, final Session session) {
 
-        if (DEBUG) LOGGER.debug("raw message: " + rawMessage);
         if (DEBUG) LOGGER.debug("websocket session: " + session.toString());
+        if (DEBUG) LOGGER.debug("raw message: " + rawMessage);
 
         try {
             final Object message = converter.fromDDP(rawMessage);
@@ -159,7 +159,7 @@ public class WebSocketClient {
 
         if (DEBUG) LOGGER.debug("registering handler: " + handler);
 
-        final Method[] allMethods = handler.getClass().getDeclaredMethods();
+        final Method[] allMethods = handler.getClass().getMethods();
         for (final Method method : allMethods) {
             final MessageHandler annotation = method.getAnnotation(MessageHandler.class);
 
