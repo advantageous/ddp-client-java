@@ -11,8 +11,6 @@ import java.util.Map;
 
 public class MapSubscriptionAdapterTest {
 
-    public static final String SERVER_ADDRESS = "ws://192.168.1.104:3200/websocket";
-
     @Test
     public void testAdded() throws Exception {
 
@@ -20,7 +18,9 @@ public class MapSubscriptionAdapterTest {
 
         final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
 
-        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, localData);
+        final ObjectConverter converter = new ObjectConverterJson();
+
+        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, converter, localData);
 
         client.registerHandler(new Object() {
 
@@ -46,7 +46,45 @@ public class MapSubscriptionAdapterTest {
             }
         });
 
-        client.connect(SERVER_ADDRESS);
+        client.connect(Constants.SERVER_ADDRESS);
+    }
+
+    @Test
+    public void testTypedAdded() throws Exception {
+
+        final Map<String, Map<String, Object>> localData = new HashMap<>();
+
+        final ObjectConverter converter = new ObjectConverterJson();
+
+        final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
+
+        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, converter, localData);
+
+        client.registerHandler(new Object() {
+
+            @MessageHandler(ConnectedMessage.class)
+            public void handleConnected(ConnectedMessage message) throws IOException {
+
+                subscriptionAdapter.subscribe("tabs", null, Constants.Tab.class, new SubscriptionCallback() {
+                    @Override
+                    public void onReady(String subscriptionId) {
+
+                        Assert.assertEquals(1, subscriptionAdapter.getDataMap().size());
+
+                        Assert.assertTrue(subscriptionAdapter.getDataMap().keySet().contains("tabs"));
+                        client.disconnect();
+
+                    }
+
+                    @Override
+                    public void onFailure(String subscriptionId, DDPError error) {
+                        Assert.fail();
+                    }
+                });
+            }
+        });
+
+        client.connect(Constants.SERVER_ADDRESS);
     }
 
     @Test
@@ -54,9 +92,11 @@ public class MapSubscriptionAdapterTest {
 
         final Map<String, Map<String, Object>> localData = new HashMap<>();
 
+        final ObjectConverter converter = new ObjectConverterJson();
+
         final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
 
-        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, localData);
+        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, converter, localData);
 
 
         //subscriptionAdapter.handleRemoved();
@@ -86,7 +126,7 @@ public class MapSubscriptionAdapterTest {
             }
         });
 
-        client.connect(SERVER_ADDRESS);
+        client.connect(Constants.SERVER_ADDRESS);
     }
 
 }

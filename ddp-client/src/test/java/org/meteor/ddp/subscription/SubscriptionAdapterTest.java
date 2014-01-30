@@ -14,7 +14,9 @@ public class SubscriptionAdapterTest {
 
 
         final WebSocketClient endpoint = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
-        final SubscriptionAdapter subscriptionAdapter = new BaseSubscriptionAdapter(endpoint);
+        final ObjectConverter converter = new ObjectConverterJson();
+
+        final SubscriptionAdapter subscriptionAdapter = new BaseSubscriptionAdapter(endpoint, converter);
 
         endpoint.registerHandler(new Object() {
 
@@ -36,19 +38,54 @@ public class SubscriptionAdapterTest {
             }
         });
 
-        endpoint.connect("ws://192.168.1.110:3200/websocket");
+        endpoint.connect(Constants.SERVER_ADDRESS);
+    }
+
+    @Test
+    public void testTypedSubscriptionAndReady() throws Exception {
+
+        MessageConverterJson messageConverter = new MessageConverterJson();
+
+        final WebSocketClient endpoint = new WebSocketClient(ClientManager.createClient(), messageConverter);
+        final ObjectConverter converter = new ObjectConverterJson();
+
+        final SubscriptionAdapter subscriptionAdapter = new BaseSubscriptionAdapter(endpoint, converter);
+
+        endpoint.registerHandler(new Object() {
+
+            @MessageHandler(ConnectedMessage.class)
+            public void handleConnected(ConnectedMessage message) throws IOException {
+
+                subscriptionAdapter.subscribe("tabs", null, Constants.Tab.class, new SubscriptionCallback() {
+                    @Override
+                    public void onReady(String subscriptionId) {
+                        endpoint.disconnect();
+                    }
+
+                    @Override
+                    public void onFailure(String subscriptionId, DDPError error) {
+                        Assert.fail();
+                    }
+                });
+
+            }
+        });
+
+        endpoint.connect(Constants.SERVER_ADDRESS);
     }
 
     @Test
     public void testFailedSubscription() throws Exception {
 
         final WebSocketClient endpoint = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
-        final SubscriptionAdapter subscriptionAdapter = new BaseSubscriptionAdapter(endpoint);
+        final ObjectConverter converter = new ObjectConverterJson();
+
+        final SubscriptionAdapter subscriptionAdapter = new BaseSubscriptionAdapter(endpoint, converter);
 
         endpoint.registerHandler(new Object() {
 
             @MessageHandler(ConnectedMessage.class)
-            private void handleConnected(ConnectedMessage message) throws IOException {
+            public void handleConnected(ConnectedMessage message) throws IOException {
 
                 subscriptionAdapter.subscribe("foo", null, new SubscriptionCallback() {
                     @Override
@@ -65,6 +102,6 @@ public class SubscriptionAdapterTest {
             }
         });
 
-        endpoint.connect("ws://192.168.1.110:3200/websocket");
+        endpoint.connect(Constants.SERVER_ADDRESS);
     }
 }

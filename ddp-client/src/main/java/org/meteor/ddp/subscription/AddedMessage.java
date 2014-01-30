@@ -1,6 +1,6 @@
 package org.meteor.ddp.subscription;
 
-import java.util.HashMap;
+import com.google.gson.JsonObject;
 
 /**
  * Message indicating that a document has been remotely added to a subscription.
@@ -14,7 +14,7 @@ public class AddedMessage {
 
     private String id;
 
-    private HashMap<String, Object> fields;
+    private JsonObject fields;
 
     public String getCollection() {
         return collection;
@@ -32,11 +32,11 @@ public class AddedMessage {
         this.id = id;
     }
 
-    public HashMap<String, Object> getFields() {
+    public JsonObject getFields() {
         return fields;
     }
 
-    public void setFields(HashMap<String, Object> fields) {
+    public void setFields(JsonObject fields) {
         this.fields = fields;
     }
 

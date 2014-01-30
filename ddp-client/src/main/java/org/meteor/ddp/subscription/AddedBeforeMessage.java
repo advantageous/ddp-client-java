@@ -1,5 +1,7 @@
 package org.meteor.ddp.subscription;
 
+import com.google.gson.JsonObject;
+
 import java.util.HashMap;
 
 /**
@@ -15,7 +17,7 @@ public class AddedBeforeMessage {
 
     private String id;
 
-    private HashMap<String, Object> fields;
+    private JsonObject fields;
 
     private String before;
 
@@ -35,11 +37,11 @@ public class AddedBeforeMessage {
         this.id = id;
     }
 
-    public HashMap<String, Object> getFields() {
+    public JsonObject getFields() {
         return fields;
     }
 
-    public void setFields(HashMap<String, Object> fields) {
+    public void setFields(JsonObject fields) {
         this.fields = fields;
     }
 

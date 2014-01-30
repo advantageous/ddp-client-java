@@ -9,9 +9,14 @@ import java.io.IOException;
  * @since 1/22/14 at 3:23 PM.
  */
 public interface SubscriptionAdapter {
+
     void subscribe(String subscriptionName,
                    Object[] params,
                    SubscriptionCallback callback) throws IOException;
+
+    void subscribe(String subscriptionName,
+                   Object[] params,
+                   Class clazz, SubscriptionCallback callback) throws IOException;
 
     void unsubscribe(String subscriptionId) throws IOException;
 }

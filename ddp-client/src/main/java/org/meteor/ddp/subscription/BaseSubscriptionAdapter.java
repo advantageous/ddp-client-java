@@ -22,7 +22,12 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
 
     protected final WebSocketClient webSocketClient;
 
-    public BaseSubscriptionAdapter(final WebSocketClient webSocketClient) {
+    protected final ObjectConverter objectConverter;
+
+    public BaseSubscriptionAdapter(final WebSocketClient webSocketClient,
+                                   final ObjectConverter objectConverter) {
+
+        this.objectConverter = objectConverter;
         this.webSocketClient = webSocketClient;
         this.webSocketClient.registerHandler(this);
     }
@@ -30,16 +35,26 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
     @Override
     public void subscribe(final String subscriptionName,
                           final Object[] params,
+                          final Class clazz,
                           final SubscriptionCallback callback) throws IOException {
 
         final Long subscriptionId = SEQUENCE.getAndIncrement();
         final String id = subscriptionId.toString();
         callbackMap.put(id, callback);
+        objectConverter.register(subscriptionName, clazz);
         final SubscribeMessage message = new SubscribeMessage();
         message.setId(id);
         message.setName(subscriptionName);
         message.setParams(params);
         webSocketClient.send(message);
+    }
+
+    @Override
+    public void subscribe(final String subscriptionName,
+                          final Object[] params,
+                          final SubscriptionCallback callback) throws IOException {
+
+        subscribe(subscriptionName, params, Object.class, callback);
     }
 
     @Override
@@ -68,5 +83,9 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
             callback.onFailure(message.getId(), message.getError());
             callbackMap.remove(message.getId());
         }
+    }
+
+    public ObjectConverter getObjectConverter() {
+        return objectConverter;
     }
 }

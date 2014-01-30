@@ -143,12 +143,9 @@ public class WebSocketClient {
         if (containers == null) return;
         for (final InstanceMethodContainer container : containers) {
             try {
-                final Method method = container.getMethod();
-                final boolean wasAccessible = method.isAccessible();
-                method.setAccessible(true);
-                method.invoke(container.getInstance(), message);
-                if (!wasAccessible) method.setAccessible(false);
+                container.getMethod().invoke(container.getInstance(), message);
             } catch (IllegalAccessException ignore) {
+                // We scan for only public methods, so this will never happen.
             } catch (InvocationTargetException e) {
                 throw new IllegalArgumentException(e);
             }

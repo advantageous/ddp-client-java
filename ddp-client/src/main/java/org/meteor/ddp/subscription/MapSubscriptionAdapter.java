@@ -20,15 +20,15 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
     private static final boolean DEBUG = LOGGER.isDebugEnabled();
 
-    private static final boolean INFO = LOGGER.isInfoEnabled();
-
     private static final boolean WARN = LOGGER.isWarnEnabled();
 
     private final Map<String, Map<String, Object>> dataMap;
 
     public MapSubscriptionAdapter(final WebSocketClient webSocketClient,
+                                  final ObjectConverter objectConverter,
                                   final Map<String, Map<String, Object>> dataMap) {
-        super(webSocketClient);
+
+        super(webSocketClient, objectConverter);
         this.dataMap = dataMap;
     }
 
@@ -40,7 +40,9 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
             localCollection = new HashMap<>();
             dataMap.put(message.getCollection(), localCollection);
         }
-        localCollection.put(message.getId(), message.getFields());
+
+        localCollection.put(message.getId(),
+                super.getObjectConverter().toObject(message.getFields(), message.getCollection()));
     }
 
     @MessageHandler(AddedBeforeMessage.class)
@@ -57,29 +59,27 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
     @MessageHandler(ChangedMessage.class)
     public void handleChanged(final ChangedMessage message) {
         if (DEBUG) LOGGER.debug("got changed message: " + message);
-        Map<String, Object> localCollection = dataMap.get(message.getCollection());
+        final Map<String, Object> localCollection = dataMap.get(message.getCollection());
         if (localCollection == null) {
-            localCollection = new HashMap<>();
-            dataMap.put(message.getCollection(), localCollection);
+            throw new IllegalStateException("Received a changed message for an item that we don't have in our local " +
+                    "map. Message: " + message);
         }
-
         final Object record = localCollection.get(message.getId());
-
-
-
-        localCollection.put(message.getId(), message.getFields());
+        final Map<String, Object> fields = message.getFields();
+        final Object updated = super.getObjectConverter().updateFields(record, fields);
+        localCollection.put(message.getId(), updated);
     }
 
     @MessageHandler(MovedBeforeMessage.class)
     public void handleMovedBefore(final MovedBeforeMessage message) {
         if (WARN) LOGGER.warn("received MovedBefore message.  The basic map subscription adapter does not support " +
-                "ordering in collections.  This message will be ignored.", message);
+                "ordering in collections.  This message will be ignored: ", message);
     }
 
     @MessageHandler(RemovedMessage.class)
     public void handleRemoved(final RemovedMessage message) {
         if (DEBUG) LOGGER.debug("got removed message: " + message);
-        Map<String, Object> localCollection = dataMap.get(message.getCollection());
+        final Map<String, Object> localCollection = dataMap.get(message.getCollection());
         if (localCollection != null) {
             localCollection.remove(message.getId());
         }
