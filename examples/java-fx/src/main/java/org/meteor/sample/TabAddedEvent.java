@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.rpc;
-
-import org.meteor.ddp.DDPError;
+package org.meteor.sample;
 
 /**
- * Interface for a RPC callback.
+ * Event published when a new tab is created.
  *
  * @author geoffc@gmail.com
- * @since 1/18/14 at 12:59 AM.
+ * @since 2/2/14 at 2:59 PM.
  */
-public interface AsyncCallback<T> {
+public class TabAddedEvent {
 
-    void onSuccess(T result);
+    private final Tab tab;
 
-    void onFailure(DDPError message);
+    public TabAddedEvent(Tab tab) {
+        this.tab = tab;
+    }
+
+    public Tab getTab() {
+        return tab;
+    }
 }

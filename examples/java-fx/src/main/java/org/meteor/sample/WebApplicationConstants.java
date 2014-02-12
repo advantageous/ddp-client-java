@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.rpc;
-
-import org.meteor.ddp.DDPError;
+package org.meteor.sample;
 
 /**
- * Interface for a RPC callback.
+ * Constant names in the web application.
  *
  * @author geoffc@gmail.com
- * @since 1/18/14 at 12:59 AM.
+ * @since 2/6/14 at 1:07 AM.
  */
-public interface AsyncCallback<T> {
+public class WebApplicationConstants {
 
-    void onSuccess(T result);
+    public static final String TABS_COLLECTION_NAME = "tabs";
 
-    void onFailure(DDPError message);
+    //Do not allow instantiation of this class.
+    private WebApplicationConstants() {
+    }
+
 }

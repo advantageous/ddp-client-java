@@ -1,0 +1,50 @@
+<head>
+  <title>ddp-test-server</title>
+</head>
+
+<body>
+  {{> venues}}
+  <hr/>
+  {{> editVenue}}
+  <hr/>
+  {{> newVenue}}
+  <hr/>
+  {{> tabs}}
+</body>
+
+<template name="venues">
+	<h1>Venues</h1>
+	<ul>
+	  {{#each venues}}
+	  	{{> venue}}
+	  {{/each}}
+	</ul>
+</template>
+
+
+<template name="venue">
+  <li>{{name}}</li>
+</template>
+
+<template name="newVenue">
+	<h1>New Venue</h1>
+	<form><input name="name" placeholder="New Venue Name" type="text"/><input type="submit" value="Create Venue"/></form>
+</template>
+
+<template name="editVenue">
+	<h1>Edit Venue {{venue.name}}</h1>
+	<form>
+		<input name="_id" type="hidden" value="{{venue._id}}"/>
+		<input name="name" placeholder="Venue Name" type="text" value="{{venue.name}}"/>
+		<input type="submit" value="Update Venue"/>
+	</form>
+</template>
+
+<template name="tabs">
+	<h1>Tabs</h1>
+	<ul>
+		{{#each tabs}}
+			<li>{{name}} - ${{total}}</li>
+		{{/each}}
+	</ul>
+</template>

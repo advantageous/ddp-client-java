@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014. Geoffrey Chandler.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.meteor.ddp.subscription;
 
 import org.meteor.ddp.MessageHandler;
@@ -11,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Base class for handling DDP subscriptions.
  *
- * @author gcc@smarttab.com
+ * @author geoffc@gmail.com
  * @since 1/21/14 at 3:55 PM.
  */
 public class BaseSubscriptionAdapter implements SubscriptionAdapter {
@@ -59,33 +75,33 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
 
     @Override
     public void unsubscribe(final String subscriptionId) throws IOException {
-        callbackMap.remove(subscriptionId);
+        this.callbackMap.remove(subscriptionId);
         final UnsubscribeMessage message = new UnsubscribeMessage();
         message.setId(subscriptionId);
         webSocketClient.send(message);
     }
 
-    @MessageHandler(ReadyMessage.class)
+    @MessageHandler
     public void handleReady(final ReadyMessage message) {
         for (final String sub : message.getSubs()) {
-            final SubscriptionCallback callback = callbackMap.get(sub);
+            final SubscriptionCallback callback = this.callbackMap.get(sub);
             if (callback != null) {
                 callback.onReady(sub);
-                callbackMap.remove(sub);
+                this.callbackMap.remove(sub);
             }
         }
     }
 
-    @MessageHandler(NoSubscriptionMessage.class)
+    @MessageHandler
     public void handleNoSub(final NoSubscriptionMessage message) {
-        final SubscriptionCallback callback = callbackMap.get(message.getId());
+        final SubscriptionCallback callback = this.callbackMap.get(message.getId());
         if (callback != null) {
             callback.onFailure(message.getId(), message.getError());
-            callbackMap.remove(message.getId());
+            this.callbackMap.remove(message.getId());
         }
     }
 
     public ObjectConverter getObjectConverter() {
-        return objectConverter;
+        return this.objectConverter;
     }
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014. Geoffrey Chandler.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.meteor.ddp;
 
 import org.slf4j.Logger;
@@ -10,9 +26,9 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 @ClientEndpoint
@@ -28,7 +44,7 @@ public class WebSocketClient {
 
     private static final boolean WARN = LOGGER.isWarnEnabled();
 
-    protected final Map<Class, Set<InstanceMethodContainer>> handlerMap = new HashMap<>();
+    protected final Map<Class, List<InstanceMethodContainer>> handlerMap = new HashMap<>();
 
     private final WebSocketContainer container;
 
@@ -47,7 +63,7 @@ public class WebSocketClient {
         this.converter = converter;
         this.latch = new CountDownLatch(1);
         this.registerHandler(new Object() {
-            @MessageHandler(ConnectedMessage.class)
+            @MessageHandler
             public final void handleConnected(final ConnectedMessage message) {
                 ddpSessionId = message.getSession();
             }
@@ -58,7 +74,7 @@ public class WebSocketClient {
 
     public void registerErrorHandler() {
         this.registerHandler(new Object() {
-            @MessageHandler(ErrorMessage.class)
+            @MessageHandler
             public void handleError(final ErrorMessage message) {
                 LOGGER.error(message.toString());
             }
@@ -67,7 +83,7 @@ public class WebSocketClient {
 
     public void registerFailedHandler() {
         this.registerHandler(new Object() {
-            @MessageHandler(FailedMessage.class)
+            @MessageHandler
             public void handleFailed(final FailedMessage message) {
                 throw new IllegalStateException("The server does not support the DDP version specified by this " +
                         "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
@@ -139,7 +155,7 @@ public class WebSocketClient {
     }
 
     private void notifyHandlers(final Object message) {
-        final Set<InstanceMethodContainer> containers = this.handlerMap.get(message.getClass());
+        final List<InstanceMethodContainer> containers = this.handlerMap.get(message.getClass());
         if (containers == null) return;
         for (final InstanceMethodContainer container : containers) {
             try {
@@ -162,26 +178,46 @@ public class WebSocketClient {
 
             if (annotation != null) {
 
-                // Make sure the annotations match the method parameters
-                if (method.getParameterTypes().length != 1 || method.getParameterTypes()[0] != annotation.value()) {
-                    throw new IllegalArgumentException("method handler annotations must match method parameter " +
-                            "type. method: " + method.getName() + " class: " + handler.getClass().getCanonicalName());
+                // Make sure there is only one method argument
+                if (method.getParameterTypes().length != 1) {
+                    throw new IllegalArgumentException(
+                            "handler methods may only have one argument; the message object");
                 }
 
-                registerMethod(annotation.value(), method, handler);
+                registerMethod(method.getParameterTypes()[0], method, handler, annotation.value().ordinal());
             }
         }
     }
 
-    private void registerMethod(final Class messageType, final Method method, final Object instance) {
+    private void registerMethod(final Class messageType,
+                                final Method method,
+                                final Object instance,
+                                final int order) {
 
         if (INFO) LOGGER.info("registering handler method: " + method);
 
-        Set<InstanceMethodContainer> handlerMethods = handlerMap.get(messageType);
+        List<InstanceMethodContainer> handlerMethods = handlerMap.get(messageType);
         if (handlerMethods == null) {
-            handlerMethods = new HashSet<>();
+            handlerMethods = new LinkedList<>();
         }
-        handlerMethods.add(new InstanceMethodContainer(method, instance));
+
+        final InstanceMethodContainer val = new InstanceMethodContainer(method, instance, order);
+
+        //Put the item in the correct order in the list
+        if (handlerMethods.size() == 0) {
+            handlerMethods.add(val);
+        } else if (handlerMethods.get(0).getOrder() > val.getOrder()) {
+            handlerMethods.add(0, val);
+        } else if (handlerMethods.get(handlerMethods.size() - 1).getOrder() < val.getOrder()) {
+            handlerMethods.add(handlerMethods.size(), val);
+        } else {
+            int i = 0;
+            while (handlerMethods.get(i).getOrder() < val.getOrder()) {
+                i++;
+            }
+            handlerMethods.add(i, val);
+        }
+
         handlerMap.put(messageType, handlerMethods);
     }
 
@@ -190,9 +226,12 @@ public class WebSocketClient {
 
         private Object instance;
 
-        private InstanceMethodContainer(Method method, Object instance) {
+        private int order;
+
+        private InstanceMethodContainer(Method method, Object instance, int order) {
             this.method = method;
             this.instance = instance;
+            this.order = order;
         }
 
         public Method getMethod() {
@@ -201,6 +240,10 @@ public class WebSocketClient {
 
         public Object getInstance() {
             return instance;
+        }
+
+        public int getOrder() {
+            return order;
         }
     }
 

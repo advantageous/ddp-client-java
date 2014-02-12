@@ -14,19 +14,45 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.rpc;
+package org.meteor.sample;
 
-import org.meteor.ddp.DDPError;
+import java.util.Date;
 
 /**
- * Interface for a RPC callback.
+ * A Tab domain object.
  *
  * @author geoffc@gmail.com
- * @since 1/18/14 at 12:59 AM.
+ * @since 2/2/14 at 1:30 PM.
  */
-public interface AsyncCallback<T> {
+public class Tab {
 
-    void onSuccess(T result);
+    private String name;
 
-    void onFailure(DDPError message);
+    private Double total;
+
+    private Date createdAt;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 }

@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.rpc;
+package org.meteor.sample;
 
-import org.meteor.ddp.DDPError;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 
 /**
- * Interface for a RPC callback.
+ * Widget to display a tab item.
  *
  * @author geoffc@gmail.com
- * @since 1/18/14 at 12:59 AM.
+ * @since 2/1/14 at 9:22 PM.
  */
-public interface AsyncCallback<T> {
+public class TabView extends Region {
 
-    void onSuccess(T result);
+    private final Tab tab;
 
-    void onFailure(DDPError message);
+    public TabView(Tab tab) {
+        this.tab = tab;
+        render();
+    }
+
+    public void render() {
+        this.getChildren().add(new Text(tab.getName()));
+        this.getChildren().add(new Text("$" + tab.getTotal().toString()));
+        if (tab.getCreatedAt() != null) this.getChildren().add(new Text(tab.getCreatedAt().toString()));
+    }
+
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014. Geoffrey Chandler.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.meteor.ddp.rpc;
 
 import org.meteor.ddp.DDPError;
@@ -12,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * This is a client for Meteor's RPC protocol.
  *
- * @author gcc@smarttab.com
+ * @author geoffc@gmail.com
  * @since 1/18/14 at 12:55 AM.
  */
 public class RPCClientImpl implements RPCClient {
@@ -55,8 +71,8 @@ public class RPCClientImpl implements RPCClient {
      *
      * @param result the result the was supplied by the server
      */
-    @MessageHandler(ResultMessage.class)
-    public void handleResult(ResultMessage result) {
+    @MessageHandler
+    public void handleResult(final ResultMessage result) {
         final DeferredMethodInvocation invocation = CALLBACK_MAP.get(result.getId());
 
         // Exit early if this message wasn't for us.
@@ -72,8 +88,8 @@ public class RPCClientImpl implements RPCClient {
         invokeIfReady(invocation);
     }
 
-    @MessageHandler(UpdatedMessage.class)
-    public void handleUpdated(UpdatedMessage updatedMessage) {
+    @MessageHandler
+    public void handleUpdated(final UpdatedMessage updatedMessage) {
         for (String thisId : updatedMessage.getMethods()) {
             final DeferredMethodInvocation invocation = CALLBACK_MAP.get(thisId);
 
