@@ -16,19 +16,21 @@
   ~ limitations under the License.
   -->
 
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
-<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="org.meteor.sample.MainViewController">
-
+<?import javafx.scene.layout.*?>
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8"
+            fx:controller="org.meteor.sample.MainViewController">
     <children>
-        <Label fx:id="status"/>
-        <ScrollPane xmlns:fx="http://javafx.com/fxml">
+        <ScrollPane prefHeight="400.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml">
             <content>
-                <VBox fx:id="scrollingVBox"/>
+                <AnchorPane>
+                    <children>
+                        <VBox fx:id="scrollingVBox" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                    </children>
+                </AnchorPane>
             </content>
         </ScrollPane>
     </children>
-
 </AnchorPane>

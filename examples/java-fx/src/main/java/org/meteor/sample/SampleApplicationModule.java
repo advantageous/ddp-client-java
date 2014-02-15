@@ -48,12 +48,6 @@ public class SampleApplicationModule extends AbstractModule {
 
     @Provides
     @Singleton
-    MainViewController provideMainViewController(EventBus eventBus) {
-        return new MainViewController(eventBus);
-    }
-
-    @Provides
-    @Singleton
     EventBus provideEventBus() {
         return new EventBus();
     }

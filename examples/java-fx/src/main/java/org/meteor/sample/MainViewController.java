@@ -20,15 +20,19 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class MainViewController {
+@Singleton
+public class MainViewController implements Initializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
@@ -36,15 +40,10 @@ public class MainViewController {
     private VBox scrollingVBox;
 
     @FXML
-    private Label status;
-
-    @FXML
     private AnchorPane root;
 
     @Inject
-    public MainViewController(final EventBus eventBus) {
-        eventBus.register(this);
-    }
+    private EventBus eventBus;
 
     @Subscribe
     public void handleAdded(final TabAddedEvent event) {
@@ -57,11 +56,13 @@ public class MainViewController {
         });
     }
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        eventBus.register(this);
+    }
+
     public AnchorPane getRoot() {
         return root;
     }
 
-    public Label getStatus() {
-        return status;
-    }
 }

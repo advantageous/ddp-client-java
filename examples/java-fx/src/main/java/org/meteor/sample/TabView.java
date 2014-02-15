@@ -16,7 +16,7 @@
 
 package org.meteor.sample;
 
-import javafx.scene.layout.Region;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 /**
@@ -25,7 +25,7 @@ import javafx.scene.text.Text;
  * @author geoffc@gmail.com
  * @since 2/1/14 at 9:22 PM.
  */
-public class TabView extends Region {
+public class TabView extends HBox {
 
     private final Tab tab;
 
@@ -35,6 +35,7 @@ public class TabView extends Region {
     }
 
     public void render() {
+        this.setSpacing(10d);
         this.getChildren().add(new Text(tab.getName()));
         this.getChildren().add(new Text("$" + tab.getTotal().toString()));
         if (tab.getCreatedAt() != null) this.getChildren().add(new Text(tab.getCreatedAt().toString()));
