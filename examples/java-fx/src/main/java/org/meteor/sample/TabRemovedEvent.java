@@ -17,35 +17,20 @@
 package org.meteor.sample;
 
 /**
- * Event published when a new tab is created.
+ * Event published when a tab is removed.
  *
  * @author geoffc@gmail.com
- * @since 2/2/14 at 2:59 PM.
+ * @since 2/14/14 at 7:23 PM.
  */
-public class TabAddedEvent {
-
-    private final Tab tab;
+public class TabRemovedEvent {
 
     private final String key;
 
-    public TabAddedEvent(final String key, final Tab tab) {
+    public TabRemovedEvent(final String key) {
         this.key = key;
-        this.tab = tab;
-    }
-
-    public Tab getTab() {
-        return tab;
     }
 
     public String getKey() {
         return key;
-    }
-
-    @Override
-    public String toString() {
-        return "TabAddedEvent{" +
-                "tab=" + tab +
-                ", key='" + key + '\'' +
-                '}';
     }
 }

@@ -27,14 +27,20 @@ import javafx.scene.text.Text;
  */
 public class TabView extends HBox {
 
-    private final Tab tab;
+    private Tab tab;
 
     public TabView(Tab tab) {
         this.tab = tab;
         render();
     }
 
+    public void setTab(Tab tab) {
+        this.tab = tab;
+        render();
+    }
+
     public void render() {
+        this.getChildren().clear();
         this.setSpacing(10d);
         this.getChildren().add(new Text(tab.getName()));
         this.getChildren().add(new Text("$" + tab.getTotal().toString()));

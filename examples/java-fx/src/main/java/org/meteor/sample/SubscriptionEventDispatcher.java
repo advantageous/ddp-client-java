@@ -47,17 +47,17 @@ public class SubscriptionEventDispatcher {
         this.register(TABS_COLLECTION_NAME, new SubscriptionEventHandler() {
             @Override
             public void handleAdded(final String key) {
-                eventBus.post(new TabAddedEvent((Tab) dataMap.get(TABS_COLLECTION_NAME).get(key)));
+                eventBus.post(new TabAddedEvent(key, (Tab) dataMap.get(TABS_COLLECTION_NAME).get(key)));
             }
 
             @Override
             public void handleChanged(final String key) {
-                //TODO: Implement.
+                eventBus.post(new TabUpdatedEvent(key, (Tab) dataMap.get(TABS_COLLECTION_NAME).get(key)));
             }
 
             @Override
             public void handleRemoved(final String key) {
-                //TODO: Implement.
+                eventBus.post(new TabRemovedEvent(key));
             }
         });
     }

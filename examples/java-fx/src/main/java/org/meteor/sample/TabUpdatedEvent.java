@@ -16,52 +16,36 @@
 
 package org.meteor.sample;
 
-import java.util.Date;
-
 /**
- * A Tab domain object.
+ * Event published when a tab is modified.
  *
  * @author geoffc@gmail.com
- * @since 2/2/14 at 1:30 PM.
+ * @since 2/14/14 at 7:21 PM.
  */
-public class Tab {
+public class TabUpdatedEvent {
 
-    private String name;
+    private final Tab tab;
 
-    private Double total;
+    private final String key;
 
-    private Date createdAt;
-
-    public String getName() {
-        return name;
+    public TabUpdatedEvent(final String key, final Tab tab) {
+        this.key = key;
+        this.tab = tab;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getKey() {
+        return key;
     }
 
-    public Double getTotal() {
-        return total;
-    }
-
-    public void setTotal(Double total) {
-        this.total = total;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public Tab getTab() {
+        return tab;
     }
 
     @Override
     public String toString() {
-        return "Tab{" +
-                ", name='" + name + '\'' +
-                ", total=" + total +
-                ", createdAt=" + createdAt +
+        return "TabUpdatedEvent{" +
+                "tab=" + tab +
+                ", key='" + key + '\'' +
                 '}';
     }
 }

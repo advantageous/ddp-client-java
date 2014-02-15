@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 @Singleton
@@ -45,13 +47,39 @@ public class MainViewController implements Initializable {
     @Inject
     private EventBus eventBus;
 
+    private Map<String, TabView> itemMap = new HashMap<>();
+
     @Subscribe
     public void handleAdded(final TabAddedEvent event) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 LOGGER.debug(event.toString());
-                scrollingVBox.getChildren().add(new TabView(event.getTab()));
+                final TabView view = new TabView(event.getTab());
+                itemMap.put(event.getKey(), view);
+                scrollingVBox.getChildren().add(view);
+            }
+        });
+    }
+
+    @Subscribe
+    public void handleRemoved(final TabRemovedEvent event) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                final TabView node = itemMap.get(event.getKey());
+                scrollingVBox.getChildren().remove(node);
+                itemMap.remove(event.getKey());
+            }
+        });
+    }
+
+    @Subscribe
+    public void handleModified(final TabUpdatedEvent event) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                itemMap.get(event.getKey()).setTab(event.getTab());
             }
         });
     }
