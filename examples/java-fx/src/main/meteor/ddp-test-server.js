@@ -1,45 +1,42 @@
-Venues = new Meteor.Collection('venues');
 Tabs = new Meteor.Collection('tabs');
 
 if (Meteor.isClient) {
-    Meteor.subscribe('venues');
     Meteor.subscribe('tabs');
 
     function extractData(form) {
-        var data = _.reduce($(form).serializeArray(), function (memo, item) {
+        return _.reduce($(form).serializeArray(), function (memo, item) {
             memo[item.name] = item.value;
             return memo;
         }, {});
-        return data;
     }
 
-    Template.venues.venues = function () {
-        return Venues.find();
+    Template.tabs.tabs = function () {
+        return Tabs.find();
     }
 
-    Template.newVenue.events({
+    Template.newTab.events({
         'submit': function (e, tmpl) {
-            var venue = extractData(e.currentTarget);
-            Venues.insert(venue);
+            var tab = extractData(e.currentTarget);
+            Tabs.insert(tab);
             return false;
         }
     });
 
-    Template.venue.events({
+    Template.tab.events({
         'click li': function (e, tmpl) {
-            Session.set('selectedVenue', tmpl.data);
+            Session.set('selectedTab', tmpl.data);
         }
     });
 
-    Template.editVenue.venue = function () {
-        return Session.get('selectedVenue');
+    Template.editTab.tab = function () {
+        return Session.get('selectedTab');
     };
 
-    Template.editVenue.events({
+    Template.editTab.events({
         'submit': function (e, tmpl) {
-            var venue = extractData(e.currentTarget);
-            Venues.update({_id: venue._id}, {
-                $set: {name: venue.name}
+            var tab = extractData(e.currentTarget);
+            Tabs.update({_id: tab._id}, {
+                $set: {name: tab.name, total: tab.total}
             });
             return false;
         }
@@ -67,15 +64,6 @@ if (Meteor.isServer) {
             if (_.isObject(tab3)) {
                 Tabs.insert(tab3);
             }
-            // if(_.isArray(data)){
-            //   _.each(data, function(tab){
-            //     Tabs.insert(tab);
-            //   });
-            //   return true;
-            // }else if(_.isObject(data)){
-            //   Tabs.insert(data);
-            //   return true;
-            // }
             return true;
         }
     });
@@ -103,15 +91,4 @@ if (Meteor.isServer) {
         }
     })
 
-    Venues.allow({
-        insert: function () {
-            return true;
-        },
-        update: function () {
-            return true;
-        },
-        remove: function () {
-            return false;
-        }
-    })
 }
