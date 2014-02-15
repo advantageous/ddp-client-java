@@ -18,14 +18,19 @@ package org.meteor.sample;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
 public class MainViewController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
     @FXML
     private VBox scrollingVBox;
@@ -43,7 +48,13 @@ public class MainViewController {
 
     @Subscribe
     public void handleAdded(final TabAddedEvent event) {
-        scrollingVBox.getChildren().add(new TabView(event.getTab()));
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                LOGGER.debug(event.toString());
+                scrollingVBox.getChildren().add(new TabView(event.getTab()));
+            }
+        });
     }
 
     public AnchorPane getRoot() {

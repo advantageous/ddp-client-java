@@ -55,4 +55,13 @@ public class Tab {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
+    @Override
+    public String toString() {
+        return "Tab{" +
+                "name='" + name + '\'' +
+                ", total=" + total +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

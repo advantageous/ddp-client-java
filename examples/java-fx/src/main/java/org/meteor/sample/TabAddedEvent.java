@@ -33,4 +33,11 @@ public class TabAddedEvent {
     public Tab getTab() {
         return tab;
     }
+
+    @Override
+    public String toString() {
+        return "TabAddedEvent{" +
+                "tab=" + tab +
+                '}';
+    }
 }
