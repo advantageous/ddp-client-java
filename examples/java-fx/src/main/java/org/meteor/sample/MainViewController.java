@@ -23,8 +23,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -35,8 +33,6 @@ import java.util.ResourceBundle;
 
 @Singleton
 public class MainViewController implements Initializable {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
     @FXML
     private VBox scrollingVBox;
@@ -54,7 +50,6 @@ public class MainViewController implements Initializable {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                LOGGER.debug(event.toString());
                 final TabView view = new TabView(event.getTab());
                 itemMap.put(event.getKey(), view);
                 scrollingVBox.getChildren().add(view);
