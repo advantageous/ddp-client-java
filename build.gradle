@@ -41,9 +41,6 @@ project(':ddp-client') {
 project(':examples:java-fx') {
     dependencies {
         compile project(':ddp-client')
-
-        compile fileTree(dir: '${java.home}/../jre/lib/', include: 'jfxrt.jar')
-
         compile 'org.glassfish.tyrus:tyrus-client:1.3.3'
         compile 'org.glassfish.tyrus:tyrus-server:1.3.3'
         compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.2.1'
