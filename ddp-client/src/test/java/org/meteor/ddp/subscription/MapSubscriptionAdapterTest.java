@@ -39,8 +39,6 @@ public class MapSubscriptionAdapterTest {
 
     private static final String CONNECTED_MESSAGE = "{\"msg\":\"connected\",\"session\":\"DNLpTnL8ZPTTizPvC\"}";
 
-    private static final String SUB_MESSAGE = "{\"msg\":\"sub\",\"id\":\"0\",\"name\":\"tabs\"}";
-
     private static final String[] ADDED_MESSAGES = {
             "{\"msg\":\"added\",\"collection\":\"tabs\",\"id\":\"uA6nsqCHnmjT3xmsm\",\"fields\":{\"name\":\"Ian Serlin\",\"total\":45.00}}",
             "{\"msg\":\"added\",\"collection\":\"tabs\",\"id\":\"GkXcKNamHLesd57wi\",\"fields\":{\"name\":\"Geoff Chandler\",\"total\":50.00}}",
@@ -52,9 +50,6 @@ public class MapSubscriptionAdapterTest {
 
     private Session mockSession;
 
-    private RemoteEndpoint.Async asyncRemote;
-
-
     @Before
     public void setup() throws Exception {
         this.wsContainer = mock(WebSocketContainer.class);
@@ -62,12 +57,8 @@ public class MapSubscriptionAdapterTest {
         this.mockSession = mock(Session.class);
         when(mockSession.isOpen()).thenReturn(true);
 
-        this.asyncRemote = mock(RemoteEndpoint.Async.class);
-        when(mockSession.getAsyncRemote()).thenReturn(this.asyncRemote);
-
-
-        //when(asyncRemote.sendText(SUB_MESSAGE)).then()
-
+        RemoteEndpoint.Async asyncRemote = mock(RemoteEndpoint.Async.class);
+        when(mockSession.getAsyncRemote()).thenReturn(asyncRemote);
 
     }
 
