@@ -16,6 +16,7 @@
 
 package org.meteor.ddp.subscription;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -65,5 +66,14 @@ public class ChangedMessage {
 
     public void setCleared(String[] cleared) {
         this.cleared = cleared;
+    }
+
+    @Override
+    public String toString() {
+        return collection + ".update(" +
+                "{_id:'" + id + "\'}" +
+                ", {$set: " + fields +
+                ", $cleared:{" + Arrays.toString(cleared) +
+                "}})";
     }
 }

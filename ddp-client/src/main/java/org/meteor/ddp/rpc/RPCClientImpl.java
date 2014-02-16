@@ -17,8 +17,8 @@
 package org.meteor.ddp.rpc;
 
 import org.meteor.ddp.DDPError;
-import org.meteor.ddp.MessageHandler;
-import org.meteor.ddp.WebSocketClient;
+import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.OnMessage;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,11 +37,11 @@ public class RPCClientImpl implements RPCClient {
 
     private static final Map<String, DeferredMethodInvocation> CALLBACK_MAP = new ConcurrentHashMap<>();
 
-    private final WebSocketClient webSocketClient;
+    private final DDPMessageEndpoint client;
 
-    public RPCClientImpl(WebSocketClient webSocketClient) {
-        this.webSocketClient = webSocketClient;
-        this.webSocketClient.registerHandler(this);
+    public RPCClientImpl(final DDPMessageEndpoint client) {
+        this.client = client;
+        this.client.registerHandler(this);
     }
 
     private static void invokeIfReady(final DeferredMethodInvocation invocation) {
@@ -63,7 +63,7 @@ public class RPCClientImpl implements RPCClient {
         message.setId(id);
         message.setMethod(methodName);
         message.setParams(params);
-        webSocketClient.send(message);
+        client.send(message);
     }
 
     /**
@@ -71,7 +71,7 @@ public class RPCClientImpl implements RPCClient {
      *
      * @param result the result the was supplied by the server
      */
-    @MessageHandler
+    @OnMessage
     public void handleResult(final ResultMessage result) {
         final DeferredMethodInvocation invocation = CALLBACK_MAP.get(result.getId());
 
@@ -88,7 +88,7 @@ public class RPCClientImpl implements RPCClient {
         invokeIfReady(invocation);
     }
 
-    @MessageHandler
+    @OnMessage
     public void handleUpdated(final UpdatedMessage updatedMessage) {
         for (String thisId : updatedMessage.getMethods()) {
             final DeferredMethodInvocation invocation = CALLBACK_MAP.get(thisId);

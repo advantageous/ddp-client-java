@@ -16,26 +16,37 @@
 
 package org.meteor.ddp.rpc;
 
-import org.glassfish.tyrus.client.ClientManager;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.meteor.ddp.*;
 
+import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.util.Date;
 
+import static org.mockito.Mockito.mock;
+
 public class RPCClientTest {
 
-    final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
+
+    private WebSocketContainer wsContainer;
+
+    @Before
+    public void setup() {
+        this.wsContainer = mock(WebSocketContainer.class);
+    }
 
     @Test
     public void testCall() throws Exception {
 
-        final RPCClient rpcClient = new RPCClientImpl(client);
+        DDPMessageEndpoint endpoint = new DDPMessageEndpoint(this.wsContainer, new MessageConverterJson());
 
-        client.registerHandler(new Object() {
+        final RPCClient rpcClient = new RPCClientImpl(endpoint);
 
-            @MessageHandler
+        endpoint.registerHandler(new Object() {
+
+            @OnMessage
             private void handleConnected(ConnectedMessage message) throws IOException {
 
                 MyTestClass one = new MyTestClass();
@@ -49,7 +60,6 @@ public class RPCClientTest {
                 rpcClient.call("addTab", new Object[]{one, two, three}, new AsyncCallback<Object>() {
                     @Override
                     public void onSuccess(Object result) {
-                        client.disconnect();
                     }
 
                     @Override
@@ -60,7 +70,7 @@ public class RPCClientTest {
             }
         });
 
-        client.connect("ws://192.168.1.110:3200/websocket");
+        endpoint.connect("ws://example.com/websocket");
 
     }
 

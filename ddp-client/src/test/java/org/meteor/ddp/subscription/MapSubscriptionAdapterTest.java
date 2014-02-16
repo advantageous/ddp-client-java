@@ -16,133 +16,147 @@
 
 package org.meteor.ddp.subscription;
 
-import org.glassfish.tyrus.client.ClientManager;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.meteor.ddp.*;
+import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.MessageConverterJson;
+import org.meteor.ddp.OnMessage;
+import org.meteor.ddp.Tab;
+import org.mockito.ArgumentCaptor;
 
-import java.io.IOException;
+import javax.websocket.*;
+import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class MapSubscriptionAdapterTest {
 
+    private static final String CONNECTED_MESSAGE = "{\"msg\":\"connected\",\"session\":\"DNLpTnL8ZPTTizPvC\"}";
+
+    private static final String SUB_MESSAGE = "{\"msg\":\"sub\",\"id\":\"0\",\"name\":\"tabs\"}";
+
+    private static final String[] ADDED_MESSAGES = {
+            "{\"msg\":\"added\",\"collection\":\"tabs\",\"id\":\"uA6nsqCHnmjT3xmsm\",\"fields\":{\"name\":\"Ian Serlin\",\"total\":45.00}}",
+            "{\"msg\":\"added\",\"collection\":\"tabs\",\"id\":\"GkXcKNamHLesd57wi\",\"fields\":{\"name\":\"Geoff Chandler\",\"total\":50.00}}",
+            "{\"msg\":\"added\",\"collection\":\"tabs\",\"id\":\"odje77pej68MiSdPB\",\"fields\":{\"name\":\"Daniel Baron\",\"total\":255.00}}",
+            "{\"msg\":\"added\",\"collection\":\"tabs\",\"id\":\"uWz3rCXYAuevqX2bJ\",\"fields\":{\"name\":\"Foo\",\"total\":5}}"
+    };
+
+    private WebSocketContainer wsContainer;
+
+    private Session mockSession;
+
+    private RemoteEndpoint.Async asyncRemote;
+
+
+    @Before
+    public void setup() throws Exception {
+        this.wsContainer = mock(WebSocketContainer.class);
+
+        this.mockSession = mock(Session.class);
+        when(mockSession.isOpen()).thenReturn(true);
+
+        this.asyncRemote = mock(RemoteEndpoint.Async.class);
+        when(mockSession.getAsyncRemote()).thenReturn(this.asyncRemote);
+
+
+        //when(asyncRemote.sendText(SUB_MESSAGE)).then()
+
+
+    }
+
+
     @Test
+    @SuppressWarnings("unchecked")
     public void testAdded() throws Exception {
 
         final Map<String, Map<String, Object>> localData = new HashMap<>();
 
-        final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
+        final DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, new MessageConverterJson());
 
         final ObjectConverter converter = new ObjectConverterJson();
 
-        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, converter, localData);
+        client.registerHandler(new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs")}, converter, localData));
+
+        final Set<Object> results = new HashSet<>();
 
         client.registerHandler(new Object() {
-
-            @MessageHandler
-            public void handleConnected(final ConnectedMessage message) throws IOException {
-
-                subscriptionAdapter.subscribe("tabs", null, new SubscriptionCallback() {
-                    @Override
-                    public void onReady(String subscriptionId) {
-
-                        Assert.assertEquals(1, subscriptionAdapter.getDataMap().size());
-
-                        Assert.assertTrue(subscriptionAdapter.getDataMap().keySet().contains("tabs"));
-                        client.disconnect();
-
-                    }
-
-                    @Override
-                    public void onFailure(String subscriptionId, DDPError error) {
-                        Assert.fail();
-                    }
-                });
+            @OnMessage(OnMessage.Phase.AFTER_UPDATE)
+            public void handleAdded(AddedMessage message) {
+                results.add(localData.get(message.getCollection()).get(message.getId()));
             }
         });
 
-        client.connect(Constants.SERVER_ADDRESS);
+        client.connect("ws://example.com/websocket");
+
+        ArgumentCaptor<DDPMessageEndpoint> endpointArgumentCaptor = ArgumentCaptor.forClass(DDPMessageEndpoint.class);
+
+        when(wsContainer.connectToServer(any(Endpoint.class), any(ClientEndpointConfig.class), any(URI.class))).thenReturn(mockSession);
+
+        verify(wsContainer).connectToServer(endpointArgumentCaptor.capture(), any(ClientEndpointConfig.class), any(URI.class));
+
+        endpointArgumentCaptor.getValue().onOpen(mockSession, mock(EndpointConfig.class));
+
+        ArgumentCaptor<MessageHandler.Whole> messageHandlerArgumentCaptor = ArgumentCaptor.forClass(MessageHandler.Whole.class);
+
+        verify(mockSession).addMessageHandler(messageHandlerArgumentCaptor.capture());
+
+        messageHandlerArgumentCaptor.getValue().onMessage(CONNECTED_MESSAGE);
+
+        for (String message : ADDED_MESSAGES)
+            messageHandlerArgumentCaptor.getValue().onMessage(message);
+
+        Assert.assertEquals(4, results.size());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testTypedAdded() throws Exception {
 
         final Map<String, Map<String, Object>> localData = new HashMap<>();
 
-        final ObjectConverter converter = new ObjectConverterJson();
-
-        final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
-
-        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, converter, localData);
-
-        client.registerHandler(new Object() {
-
-            @MessageHandler
-            public void handleConnected(ConnectedMessage message) throws IOException {
-
-                subscriptionAdapter.subscribe("tabs", null, Constants.Tab.class, new SubscriptionCallback() {
-                    @Override
-                    public void onReady(String subscriptionId) {
-
-                        Assert.assertEquals(1, subscriptionAdapter.getDataMap().size());
-
-                        Assert.assertTrue(subscriptionAdapter.getDataMap().keySet().contains("tabs"));
-                        client.disconnect();
-
-                    }
-
-                    @Override
-                    public void onFailure(String subscriptionId, DDPError error) {
-                        Assert.fail();
-                    }
-                });
-            }
-        });
-
-        client.connect(Constants.SERVER_ADDRESS);
-    }
-
-    @Test
-    public void testRemoved() throws Exception {
-
-        final Map<String, Map<String, Object>> localData = new HashMap<>();
+        final DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, new MessageConverterJson());
 
         final ObjectConverter converter = new ObjectConverterJson();
 
-        final WebSocketClient client = new WebSocketClient(ClientManager.createClient(), new MessageConverterJson());
+        client.registerHandler(new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs", Tab.class)}, converter, localData));
 
-        final MapSubscriptionAdapter subscriptionAdapter = new MapSubscriptionAdapter(client, converter, localData);
-
-
-        //subscriptionAdapter.handleRemoved();
-
+        final Set<Object> results = new HashSet<>();
 
         client.registerHandler(new Object() {
-
-            @MessageHandler
-            private void handleConnected(ConnectedMessage message) throws IOException {
-
-                subscriptionAdapter.subscribe("tabs", null, new SubscriptionCallback() {
-                    @Override
-                    public void onReady(String subscriptionId) {
-
-                        Assert.assertEquals(1, subscriptionAdapter.getDataMap().size());
-
-                        Assert.assertTrue(subscriptionAdapter.getDataMap().keySet().contains("tabs"));
-                        client.disconnect();
-
-                    }
-
-                    @Override
-                    public void onFailure(String subscriptionId, DDPError error) {
-                        Assert.fail();
-                    }
-                });
+            @OnMessage(OnMessage.Phase.AFTER_UPDATE)
+            public void handleAdded(AddedMessage message) {
+                results.add(localData.get(message.getCollection()).get(message.getId()));
             }
         });
 
-        client.connect(Constants.SERVER_ADDRESS);
+        client.connect("ws://example.com/websocket");
+
+        ArgumentCaptor<DDPMessageEndpoint> endpointArgumentCaptor = ArgumentCaptor.forClass(DDPMessageEndpoint.class);
+
+        when(wsContainer.connectToServer(any(Endpoint.class), any(ClientEndpointConfig.class), any(URI.class))).thenReturn(mockSession);
+
+        verify(wsContainer).connectToServer(endpointArgumentCaptor.capture(), any(ClientEndpointConfig.class), any(URI.class));
+
+        endpointArgumentCaptor.getValue().onOpen(mockSession, mock(EndpointConfig.class));
+
+        ArgumentCaptor<MessageHandler.Whole> messageHandlerArgumentCaptor = ArgumentCaptor.forClass(MessageHandler.Whole.class);
+
+        verify(mockSession).addMessageHandler(messageHandlerArgumentCaptor.capture());
+
+        messageHandlerArgumentCaptor.getValue().onMessage(CONNECTED_MESSAGE);
+
+        for (String message : ADDED_MESSAGES)
+            messageHandlerArgumentCaptor.getValue().onMessage(message);
+
+        Assert.assertEquals(4, results.size());
+
     }
 
 }

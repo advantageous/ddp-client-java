@@ -17,7 +17,7 @@
 package org.meteor.sample;
 
 import com.google.common.eventbus.EventBus;
-import org.meteor.ddp.MessageHandler;
+import org.meteor.ddp.OnMessage;
 import org.meteor.ddp.subscription.AddedBeforeMessage;
 import org.meteor.ddp.subscription.AddedMessage;
 import org.meteor.ddp.subscription.ChangedMessage;
@@ -62,29 +62,29 @@ public class SubscriptionEventDispatcher {
         });
     }
 
-    public void register(final String colletion, final SubscriptionEventHandler handler) {
-        handlerMap.put(colletion, handler);
+    public void register(final String collection, final SubscriptionEventHandler handler) {
+        handlerMap.put(collection, handler);
     }
 
-    @MessageHandler(MessageHandler.Phase.AFTER_UPDATE)
+    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleAdded(final AddedMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleAdded(message.getId());
     }
 
-    @MessageHandler(MessageHandler.Phase.AFTER_UPDATE)
+    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleAddedBefore(final AddedBeforeMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleAdded(message.getId());
     }
 
-    @MessageHandler(MessageHandler.Phase.AFTER_UPDATE)
+    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleChanged(final ChangedMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleChanged(message.getId());
     }
 
-    @MessageHandler(MessageHandler.Phase.AFTER_UPDATE)
+    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleRemoved(final RemovedMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleRemoved(message.getId());

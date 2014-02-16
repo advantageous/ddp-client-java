@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package org.meteor.sample;
+package org.meteor.ddp;
+
+import java.util.List;
 
 /**
- * A Tab domain object.
+ * Tab domain object for tests.
  *
  * @author geoffc@gmail.com
- * @since 2/2/14 at 1:30 PM.
+ * @since 2/14/14 at 8:47 PM.
  */
 public class Tab {
-
     private String name;
 
     private Object createdAt;
 
     private Number total;
+
+    private List<Customer> customers;
 
     public String getName() {
         return name;
@@ -52,5 +55,13 @@ public class Tab {
 
     public void setTotal(Number total) {
         this.total = total;
+    }
+
+    public List<Customer> getCustomers() {
+        return customers;
+    }
+
+    public void setCustomers(List<Customer> customers) {
+        this.customers = customers;
     }
 }

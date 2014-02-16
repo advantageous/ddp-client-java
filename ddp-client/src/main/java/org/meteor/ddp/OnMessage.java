@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp;
 
-import org.meteor.ddp.DDPError;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Callback run when a subscription is handled.
+ * Subscribe to ddp messages.
  *
  * @author geoffc@gmail.com
- * @since 1/21/14 at 4:08 PM.
+ * @since 1/17/14 at 7:44 PM.
  */
-public interface SubscriptionCallback {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface OnMessage {
 
-    void onReady(String subscriptionId);
+    public Phase value() default Phase.UPDATE;
 
-    void onFailure(String subscriptionId, DDPError error);
+    public enum Phase {
+        BEFORE_UPDATE, UPDATE, AFTER_UPDATE
+    }
 }

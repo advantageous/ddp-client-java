@@ -31,12 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-@ClientEndpoint
-public class WebSocketClient {
+public class DDPMessageEndpoint extends Endpoint {
 
     public static final String DDP_PROTOCOL_VERSION = "pre1";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DDPMessageEndpoint.class);
+
+    private static final boolean TRACE = LOGGER.isTraceEnabled();
 
     private static final boolean DEBUG = LOGGER.isDebugEnabled();
 
@@ -48,23 +49,24 @@ public class WebSocketClient {
 
     private final WebSocketContainer container;
 
-    private final CountDownLatch latch;
+    private final MessageConverter messageConverter;
 
-    private final MessageConverter converter;
+    private CountDownLatch latch;
 
-    private Session webSocketSession;
+    private Session websocketSession;
 
     private String ddpSessionId = null;
 
-    public WebSocketClient(final WebSocketContainer container,
-                           final MessageConverter converter) {
+    public DDPMessageEndpoint(final WebSocketContainer container,
+                              final MessageConverter converter) {
 
         this.container = container;
-        this.converter = converter;
-        this.latch = new CountDownLatch(1);
+        this.messageConverter = converter;
+
         this.registerHandler(new Object() {
-            @MessageHandler
+            @OnMessage
             public final void handleConnected(final ConnectedMessage message) {
+                if (DEBUG) LOGGER.debug("got connected message: " + message);
                 ddpSessionId = message.getSession();
             }
         });
@@ -72,31 +74,23 @@ public class WebSocketClient {
         registerFailedHandler();
     }
 
-    public void registerErrorHandler() {
-        this.registerHandler(new Object() {
-            @MessageHandler
-            public void handleError(final ErrorMessage message) {
-                LOGGER.error(message.toString());
+    @Override
+    public void onOpen(Session session, EndpointConfig config) {
+        if (INFO) LOGGER.info("websocket connected ... " + session.getId());
+
+        this.websocketSession = session;
+        websocketSession.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
+            public void onMessage(String rawMessage) {
+                if (TRACE) LOGGER.trace("raw message: " + rawMessage);
+                try {
+                    final Object message = messageConverter.fromDDP(rawMessage);
+                    if (message != null) notifyHandlers(message);
+                } catch (UnsupportedMessageException e) {
+                    if (WARN) LOGGER.warn("unhandled message from server: " + e.getMessage());
+                }
             }
         });
-    }
-
-    public void registerFailedHandler() {
-        this.registerHandler(new Object() {
-            @MessageHandler
-            public void handleFailed(final FailedMessage message) {
-                throw new IllegalStateException("The server does not support the DDP version specified by this " +
-                        "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
-                        DDP_PROTOCOL_VERSION);
-            }
-        });
-    }
-
-    @OnOpen
-    public void onOpen(final Session session) {
-        if (INFO) LOGGER.info("Connected ... " + session.getId());
-
-        this.webSocketSession = session;
 
         try {
             final ConnectMessage connectMessage =
@@ -111,42 +105,19 @@ public class WebSocketClient {
         }
     }
 
-    @OnMessage
-    public void onMessage(final String rawMessage, final Session session) {
-
-        if (DEBUG) LOGGER.debug("websocket session: " + session.toString());
-        if (DEBUG) LOGGER.debug("raw message: " + rawMessage);
-
-        try {
-            final Object message = converter.fromDDP(rawMessage);
-            if (message != null) notifyHandlers(message);
-        } catch (UnsupportedMessageException e) {
-            if (WARN) LOGGER.warn("unhandled message from server: " + e.getMessage());
-        }
-    }
-
-    @OnClose
-    public void onClose(final Session session, final CloseReason closeReason) {
-        if (INFO) LOGGER.info(String.format("Session %s close because of %s", session.getId(), closeReason));
-        this.webSocketSession = null;
+    @Override
+    public void onClose(Session session, CloseReason closeReason) {
+        if (INFO) LOGGER.info(String.format("websocket closed %s close because of %s", session.getId(), closeReason));
         latch.countDown();
     }
 
-    public void send(final Object message) throws IOException {
-        if (this.webSocketSession == null) throw new IllegalStateException("you must connect before sending data.");
-        final String convertedMessage = converter.toDDP(message);
-        if (DEBUG) LOGGER.debug("sending message: " + convertedMessage);
-        this.webSocketSession.getBasicRemote().sendText(convertedMessage);
-    }
-
-    public void disconnect() {
-        latch.countDown();
+    public void disconnect() throws IOException {
+        this.websocketSession.close();
     }
 
     public void connect(final String address) throws IOException, InterruptedException {
         try {
-            container.connectToServer(this, new URI(address));
-            latch.await();
+            container.connectToServer(this, ClientEndpointConfig.Builder.create().build(), new URI(address));
         } catch (DeploymentException e) {
             throw new IllegalStateException(e);
         } catch (URISyntaxException e) {
@@ -154,15 +125,38 @@ public class WebSocketClient {
         }
     }
 
+    protected void registerErrorHandler() {
+        this.registerHandler(new Object() {
+            @OnMessage
+            public void handleError(final ErrorMessage message) {
+                LOGGER.error(message.toString());
+            }
+        });
+    }
+
+    protected void registerFailedHandler() {
+        this.registerHandler(new Object() {
+            @OnMessage
+            public void handleFailed(final FailedMessage message) {
+                throw new IllegalStateException("The server does not support the DDP version specified by this " +
+                        "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
+                        DDP_PROTOCOL_VERSION);
+            }
+        });
+    }
+
     private void notifyHandlers(final Object message) {
         final List<InstanceMethodContainer> containers = this.handlerMap.get(message.getClass());
         if (containers == null) return;
         for (final InstanceMethodContainer container : containers) {
             try {
+                container.getMethod().setAccessible(true);
                 container.getMethod().invoke(container.getInstance(), message);
-            } catch (IllegalAccessException ignore) {
-                // We scan for only public methods, so this will never happen.
+            } catch (IllegalAccessException e) {
+                // We scan for only public methods, so this should never happen.
+                throw new IllegalStateException(e);
             } catch (InvocationTargetException e) {
+                e.printStackTrace();
                 throw new IllegalArgumentException(e);
             }
         }
@@ -174,7 +168,7 @@ public class WebSocketClient {
 
         final Method[] allMethods = handler.getClass().getMethods();
         for (final Method method : allMethods) {
-            final MessageHandler annotation = method.getAnnotation(MessageHandler.class);
+            final OnMessage annotation = method.getAnnotation(OnMessage.class);
 
             if (annotation != null) {
 
@@ -221,6 +215,21 @@ public class WebSocketClient {
         handlerMap.put(messageType, handlerMethods);
     }
 
+    public void await() throws InterruptedException {
+        this.latch = new CountDownLatch(1);
+        this.latch.await();
+    }
+
+    public void send(final Object message) throws IOException {
+        if (DEBUG) LOGGER.debug("sending message: " + message);
+        if (this.websocketSession == null || !this.websocketSession.isOpen()) {
+            throw new IllegalStateException("you must connect before sending data.");
+        }
+        final String convertedMessage = messageConverter.toDDP(message);
+        if (DEBUG) LOGGER.debug("sending message: " + convertedMessage);
+        this.websocketSession.getAsyncRemote().sendText(convertedMessage);
+    }
+
     protected static final class InstanceMethodContainer {
         private Method method;
 
@@ -246,5 +255,4 @@ public class WebSocketClient {
             return order;
         }
     }
-
 }

@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
-
-import java.io.IOException;
+package org.meteor.ddp;
 
 /**
- * Interface for a meteor subscription adapter.
- *
- * @author geoffc@gmail.com
- * @since 1/22/14 at 3:23 PM.
- */
-public interface SubscriptionAdapter {
+* Domain object for a customer to be used in tests.
+*
+* @author geoffc@gmail.com
+* @since 2/14/14 at 8:48 PM.
+*/
+public class Customer {
+    private String name;
 
-    void subscribe(Subscription subscription) throws IOException;
+    public String getName() {
+        return name;
+    }
 
-    void unsubscribe(String subscriptionId) throws IOException;
-
+    public void setName(String name) {
+        this.name = name;
+    }
 }

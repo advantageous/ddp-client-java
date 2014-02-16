@@ -26,9 +26,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.meteor.ddp.*;
+import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.ErrorMessage;
+import org.meteor.ddp.OnMessage;
 import org.meteor.ddp.subscription.MapSubscriptionAdapter;
-import org.meteor.ddp.subscription.SubscriptionCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,16 +41,16 @@ public class SampleApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(SampleApplication.class);
 
     @Inject
-    private MapSubscriptionAdapter subscriptionAdapter;
-
-    @Inject
-    private WebSocketClient client;
+    private DDPMessageEndpoint client;
 
     @Inject
     private MainViewController mainController;
 
     @Inject
     private SubscriptionEventDispatcher dispatcher;
+
+    @Inject
+    private MapSubscriptionAdapter mapSubscriptionAdapter;
 
     {
         final Injector injector = Guice.createInjector(new SampleApplicationModule());
@@ -71,6 +72,7 @@ public class SampleApplication extends Application {
 
         client.registerHandler(this);
         client.registerHandler(dispatcher);
+        client.registerHandler(mapSubscriptionAdapter);
 
     }
 
@@ -90,25 +92,7 @@ public class SampleApplication extends Application {
         stage.show();
     }
 
-    @MessageHandler
-    public void handleConnected(ConnectedMessage message) throws IOException {
-        LOGGER.info("connected: " + message.getSession());
-        subscriptionAdapter.subscribe(WebApplicationConstants.TABS_COLLECTION_NAME, null, Tab.class,
-                new SubscriptionCallback() {
-                    @Override
-                    public void onReady(String subscriptionId) {
-                        LOGGER.info("subscription ready: " + subscriptionId);
-                    }
-
-                    @Override
-                    public void onFailure(String subscriptionId, DDPError error) {
-                        LOGGER.error("subscription failed: " + error);
-                    }
-                }
-        );
-    }
-
-    @MessageHandler
+    @OnMessage
     public void handleError(ErrorMessage message) {
         LOGGER.error("error: " + message.getReason());
     }
@@ -120,8 +104,9 @@ public class SampleApplication extends Application {
             return new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
-                    LOGGER.info("connecting to client.");
                     client.connect("ws://localhost:3000/websocket");
+                    client.await();
+                    LOGGER.warn("disconected from endpoint");
                     return null;
                 }
             };

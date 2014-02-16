@@ -16,24 +16,20 @@
 
 package org.meteor.ddp;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Subscribe to ddp messages.
+ * Interface for a DDP message handler.
  *
  * @author geoffc@gmail.com
- * @since 1/17/14 at 7:44 PM.
+ * @since 2/14/14 at 10:05 PM.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface MessageHandler {
+public interface DDPMessageHandler<T> {
 
-    public Phase value() default Phase.UPDATE;
-
-    public enum Phase {
-        BEFORE_UPDATE, UPDATE, AFTER_UPDATE
+    public interface Subscription<T> extends DDPMessageHandler<T> {
+        void onMessage(T message);
     }
+
+    public interface RPC<T> extends DDPMessageHandler<T> {
+        void onMessage(T message);
+    }
+
 }
