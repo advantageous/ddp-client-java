@@ -63,12 +63,9 @@ public class DDPMessageEndpoint extends Endpoint {
         this.container = container;
         this.messageConverter = converter;
 
-        this.registerHandler(new Object() {
-            @OnMessage
-            public final void handleConnected(final ConnectedMessage message) {
-                if (DEBUG) LOGGER.debug("got connected message: " + message);
-                ddpSessionId = message.getSession();
-            }
+        this.registerHandler(ConnectedMessage.class, message -> {
+            if (DEBUG) LOGGER.debug("got connected message: " + message);
+            ddpSessionId = message.getSession();
         });
         registerErrorHandler();
         registerFailedHandler();
@@ -126,22 +123,15 @@ public class DDPMessageEndpoint extends Endpoint {
     }
 
     protected void registerErrorHandler() {
-        this.registerHandler(new Object() {
-            @OnMessage
-            public void handleError(final ErrorMessage message) {
-                LOGGER.error(message.toString());
-            }
-        });
+        this.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.toString()));
     }
 
     protected void registerFailedHandler() {
-        this.registerHandler(new Object() {
-            @OnMessage
-            public void handleFailed(final FailedMessage message) {
-                throw new IllegalStateException("The server does not support the DDP version specified by this " +
-                        "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
-                        DDP_PROTOCOL_VERSION);
-            }
+        this.registerHandler(FailedMessage.class, message -> {
+            throw new IllegalStateException("The server does not support the DDP version specified by this " +
+                    "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
+                    DDP_PROTOCOL_VERSION);
+
         });
     }
 
@@ -162,40 +152,31 @@ public class DDPMessageEndpoint extends Endpoint {
         }
     }
 
-    public void registerHandler(final Object handler) {
+    public <T> void registerHandler(final Class<T> messageType,
+                                    final DDPMessageHandler<T> handler,
+                                    final Phase phase) {
+        if (DEBUG) LOGGER.debug("registering handler: " + handler.getClass().getName());
 
-        if (DEBUG) LOGGER.debug("registering handler: " + handler);
-
-        final Method[] allMethods = handler.getClass().getMethods();
-        for (final Method method : allMethods) {
-            final OnMessage annotation = method.getAnnotation(OnMessage.class);
-
-            if (annotation != null) {
-
-                // Make sure there is only one method argument
-                if (method.getParameterTypes().length != 1) {
-                    throw new IllegalArgumentException(
-                            "handler methods may only have one argument; the message object");
-                }
-
-                registerMethod(method.getParameterTypes()[0], method, handler, annotation.value().ordinal());
-            }
+        final Method method;
+        try {
+            method = handler.getClass().getMethod("onMessage", Object.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
-    }
 
-    private void registerMethod(final Class messageType,
-                                final Method method,
-                                final Object instance,
-                                final int order) {
-
-        if (INFO) LOGGER.info("registering handler method: " + method);
+        // Make sure there is only one method argument
+        if (method.getParameterTypes().length != 1) {
+            throw new IllegalArgumentException(
+                    "handler methods may only have one argument; the message object");
+        }
 
         List<InstanceMethodContainer> handlerMethods = handlerMap.get(messageType);
         if (handlerMethods == null) {
             handlerMethods = new LinkedList<>();
         }
 
-        final InstanceMethodContainer val = new InstanceMethodContainer(method, instance, order);
+        final InstanceMethodContainer val = new InstanceMethodContainer(method, handler, phase.ordinal());
 
         //Put the item in the correct order in the list
         if (handlerMethods.size() == 0) {
@@ -213,6 +194,12 @@ public class DDPMessageEndpoint extends Endpoint {
         }
 
         handlerMap.put(messageType, handlerMethods);
+
+    }
+
+    public <T> void registerHandler(final Class<T> messageType,
+                                    final DDPMessageHandler<T> handler) {
+        registerHandler(messageType, handler, Phase.UPDATE);
     }
 
     public void await() throws InterruptedException {
@@ -228,6 +215,10 @@ public class DDPMessageEndpoint extends Endpoint {
         final String convertedMessage = messageConverter.toDDP(message);
         if (DEBUG) LOGGER.debug("sending message: " + convertedMessage);
         this.websocketSession.getAsyncRemote().sendText(convertedMessage);
+    }
+
+    public static enum Phase {
+        BEFORE_UPDATE, UPDATE, AFTER_UPDATE
     }
 
     protected static final class InstanceMethodContainer {

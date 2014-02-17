@@ -45,10 +45,7 @@ public class DDPMessageEndpointTest {
     @Test
     public void testRegisterHandler() throws Exception {
         DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, null);
-        client.registerHandler(new Object() {
-            @OnMessage
-            public void handleReady(ConnectedMessage message) {
-            }
+        client.registerHandler(ConnectedMessage.class, message -> {
         });
         List<DDPMessageEndpoint.InstanceMethodContainer> methods = client.handlerMap.get(ConnectedMessage.class);
         assertEquals(2, methods.size());
@@ -56,16 +53,14 @@ public class DDPMessageEndpointTest {
 
     /**
      * TODO: Make this test actually mock the Session and verify that the connection happens
+     *
      * @throws Exception
      */
     @Test
     public void testConnectAndDisconnect() throws Exception {
 
         final DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, new MessageConverterJson());
-        client.registerHandler(new Object() {
-            @OnMessage
-            private void handleConnected(ConnectedMessage message) {
-            }
+        client.registerHandler(ConnectedMessage.class, message -> {
         });
 
         client.connect(WS_URL);

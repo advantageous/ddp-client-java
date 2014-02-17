@@ -39,6 +39,9 @@ project(':ddp-client') {
         compile 'com.google.code.gson:gson:2.2.4'
         compile 'commons-beanutils:commons-beanutils:1.9.1'
         compile 'javax.websocket:javax.websocket-api:1.0'
+
+        compile 'com.google.guava:guava:10.0.1'
+
     }
 }
 

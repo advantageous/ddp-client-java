@@ -66,8 +66,9 @@ public class SampleApplicationModule extends AbstractModule {
     @Provides
     @Singleton
     SubscriptionEventDispatcher provideDispatcher(final EventBus eventBus,
+                                                  final DDPMessageEndpoint endpoint,
                                                   final @Named("Local Data Map") Map<String, Map<String, Object>> dataMap) {
-        return new SubscriptionEventDispatcher(eventBus, dataMap);
+        return new SubscriptionEventDispatcher(eventBus, endpoint, dataMap);
     }
 
     @Provides

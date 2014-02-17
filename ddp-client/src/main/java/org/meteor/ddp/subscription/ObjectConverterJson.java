@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Converts from json to objects based on the collection type that is registered.
- * <p/>
+ * <p>
  * Created by gcc on 1/29/14.
  */
 public class ObjectConverterJson implements ObjectConverter {
@@ -56,7 +56,7 @@ public class ObjectConverterJson implements ObjectConverter {
 
         final Object ret;
         if (clazz != null) {
-            ret = GSON.fromJson(serializedObject, classMap.get(collectionName));
+            ret = GSON.fromJson(serializedObject, clazz);
         } else {
             LOGGER.error("could not find registered class for deserialization: " + collectionName);
             ret = null;

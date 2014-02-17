@@ -17,7 +17,6 @@
 package org.meteor.ddp.subscription;
 
 import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.OnMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,15 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
                                   final Map<String, Map<String, Object>> dataMap) {
 
         super(endpoint, subscriptions, objectConverter);
+
         this.dataMap = dataMap;
+
+        endpoint.registerHandler(AddedMessage.class, this::handleAdded);
+        endpoint.registerHandler(AddedBeforeMessage.class, this::handleAddedBefore);
+        endpoint.registerHandler(ChangedMessage.class, this::handleChanged);
+        endpoint.registerHandler(MovedBeforeMessage.class, this::handleMovedBefore);
+        endpoint.registerHandler(RemovedMessage.class, this::handleRemoved);
+
     }
 
     public MapSubscriptionAdapter(final DDPMessageEndpoint endpoint,
@@ -53,12 +60,9 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
                                   final ObjectConverter objectConverter,
                                   final Map<String, Map<String, Object>> dataMap) {
 
-        super(endpoint, new HashSet<>(Arrays.asList(subscriptions)), objectConverter);
-        this.dataMap = dataMap;
+        this(endpoint, new HashSet<>(Arrays.asList(subscriptions)), objectConverter, dataMap);
     }
 
-
-    @OnMessage
     public void handleAdded(final AddedMessage message) {
         if (DEBUG) LOGGER.debug(message.toString());
         Map<String, Object> localCollection = dataMap.get(message.getCollection());
@@ -71,7 +75,6 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
         localCollection.put(message.getId(), value);
     }
 
-    @OnMessage
     public void handleAddedBefore(final AddedBeforeMessage message) {
         if (WARN) LOGGER.warn("received AddedBefore message.  The basic map subscription adapter does not support " +
                 "ordering in collections.  The item will be treated as a regular Added event.", message);
@@ -82,7 +85,6 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
         this.handleAdded(addedMessage);
     }
 
-    @OnMessage
     public void handleChanged(final ChangedMessage message) {
         if (DEBUG) LOGGER.debug(message.toString());
         final Map<String, Object> localCollection = dataMap.get(message.getCollection());
@@ -96,22 +98,16 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
         localCollection.put(message.getId(), updated);
     }
 
-    @OnMessage
     public void handleMovedBefore(final MovedBeforeMessage message) {
         if (WARN) LOGGER.warn("received MovedBefore message.  The basic map subscription adapter does not support " +
                 "ordering in collections.  This message will be ignored: ", message);
     }
 
-    @OnMessage
     public void handleRemoved(final RemovedMessage message) {
         if (DEBUG) LOGGER.debug(message.toString());
         final Map<String, ?> localCollection = dataMap.get(message.getCollection());
         if (localCollection != null) {
             localCollection.remove(message.getId());
         }
-    }
-
-    protected Map<String, Map<String, Object>> getDataMap() {
-        return dataMap;
     }
 }

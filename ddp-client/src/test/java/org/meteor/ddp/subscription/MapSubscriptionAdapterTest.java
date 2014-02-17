@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.meteor.ddp.DDPMessageEndpoint;
 import org.meteor.ddp.MessageConverterJson;
-import org.meteor.ddp.OnMessage;
 import org.meteor.ddp.Tab;
 import org.mockito.ArgumentCaptor;
 
@@ -73,15 +72,12 @@ public class MapSubscriptionAdapterTest {
 
         final ObjectConverter converter = new ObjectConverterJson();
 
-        client.registerHandler(new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs")}, converter, localData));
+        new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs")}, converter, localData);
 
         final Set<Object> results = new HashSet<>();
 
-        client.registerHandler(new Object() {
-            @OnMessage(OnMessage.Phase.AFTER_UPDATE)
-            public void handleAdded(AddedMessage message) {
-                results.add(localData.get(message.getCollection()).get(message.getId()));
-            }
+        client.registerHandler(AddedMessage.class, message -> {
+            results.add(localData.get(message.getCollection()).get(message.getId()));
         });
 
         client.connect("ws://example.com/websocket");
@@ -116,15 +112,12 @@ public class MapSubscriptionAdapterTest {
 
         final ObjectConverter converter = new ObjectConverterJson();
 
-        client.registerHandler(new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs", Tab.class)}, converter, localData));
+        new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs", Tab.class)}, converter, localData);
 
         final Set<Object> results = new HashSet<>();
 
-        client.registerHandler(new Object() {
-            @OnMessage(OnMessage.Phase.AFTER_UPDATE)
-            public void handleAdded(AddedMessage message) {
-                results.add(localData.get(message.getCollection()).get(message.getId()));
-            }
+        client.registerHandler(AddedMessage.class, message -> {
+            results.add(localData.get(message.getCollection()).get(message.getId()));
         });
 
         client.connect("ws://example.com/websocket");

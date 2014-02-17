@@ -25,10 +25,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.meteor.ddp.DDPMessageEndpoint;
 import org.meteor.ddp.ErrorMessage;
-import org.meteor.ddp.OnMessage;
 import org.meteor.ddp.subscription.MapSubscriptionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,12 +54,7 @@ public class SampleApplication extends Application {
         final Injector injector = Guice.createInjector(new SampleApplicationModule());
 
         final FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
-        loader.setControllerFactory(new Callback<Class<?>, Object>() {
-            @Override
-            public Object call(Class<?> aClass) {
-                return injector.getInstance(aClass);
-            }
-        });
+        loader.setControllerFactory(injector::getInstance);
         try {
             loader.load();
         } catch (IOException e) {
@@ -70,9 +63,7 @@ public class SampleApplication extends Application {
 
         injector.injectMembers(this);
 
-        client.registerHandler(this);
-        client.registerHandler(dispatcher);
-        client.registerHandler(mapSubscriptionAdapter);
+        client.registerHandler(ErrorMessage.class, message -> LOGGER.error("error: " + message.getReason()));
 
     }
 
@@ -90,11 +81,6 @@ public class SampleApplication extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
-    }
-
-    @OnMessage
-    public void handleError(ErrorMessage message) {
-        LOGGER.error("error: " + message.getReason());
     }
 
     class MeteorService extends Service {

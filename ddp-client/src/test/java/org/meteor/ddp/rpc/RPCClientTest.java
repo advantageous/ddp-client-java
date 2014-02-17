@@ -19,7 +19,10 @@ package org.meteor.ddp.rpc;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.meteor.ddp.*;
+import org.meteor.ddp.ConnectedMessage;
+import org.meteor.ddp.DDPError;
+import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.MessageConverterJson;
 
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
@@ -44,19 +47,17 @@ public class RPCClientTest {
 
         final RPCClient rpcClient = new RPCClientImpl(endpoint);
 
-        endpoint.registerHandler(new Object() {
+        endpoint.registerHandler(ConnectedMessage.class, message -> {
 
-            @OnMessage
-            private void handleConnected(ConnectedMessage message) throws IOException {
+            MyTestClass one = new MyTestClass();
+            one.setName("First Object");
+            MyTestClass two = new MyTestClass();
+            two.setName("Second Object");
+            two.setDate(new Date());
+            MyTestClass three = new MyTestClass();
+            three.setDate(new Date());
 
-                MyTestClass one = new MyTestClass();
-                one.setName("First Object");
-                MyTestClass two = new MyTestClass();
-                two.setName("Second Object");
-                two.setDate(new Date());
-                MyTestClass three = new MyTestClass();
-                three.setDate(new Date());
-
+            try {
                 rpcClient.call("addTab", new Object[]{one, two, three}, new AsyncCallback<Object>() {
                     @Override
                     public void onSuccess(Object result) {
@@ -67,6 +68,9 @@ public class RPCClientTest {
                         Assert.fail(message.getReason());
                     }
                 });
+            } catch (IOException e) {
+                e.printStackTrace();
+                Assert.fail(e.getMessage());
             }
         });
 
