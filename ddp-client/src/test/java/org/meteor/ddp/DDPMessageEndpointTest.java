@@ -24,7 +24,8 @@ import org.mockito.ArgumentCaptor;
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.WebSocketContainer;
 import java.net.URI;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -47,8 +48,8 @@ public class DDPMessageEndpointTest {
         DDPMessageEndpointImpl client = new DDPMessageEndpointImpl(wsContainer, null);
         client.registerHandler(ConnectedMessage.class, message -> {
         });
-        List<DDPMessageEndpointImpl.InstanceMethodContainer> methods = client.handlerMap.get(ConnectedMessage.class);
-        assertEquals(2, methods.size());
+        Map<DDPMessageHandler.Phase, Set<DDPMessageHandler>> methods = client.handlerMap.get(ConnectedMessage.class);
+        assertEquals(2, methods.get(DDPMessageHandler.Phase.UPDATE).size());
     }
 
     /**

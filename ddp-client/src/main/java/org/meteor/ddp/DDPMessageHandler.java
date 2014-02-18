@@ -26,4 +26,7 @@ public interface DDPMessageHandler<T> {
 
     void onMessage(T message);
 
+    enum Phase {
+        BEFORE_UPDATE, UPDATE, AFTER_UPDATE
+    }
 }

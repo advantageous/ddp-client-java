@@ -19,10 +19,7 @@ package org.meteor.ddp.subscription;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.DDPMessageEndpointImpl;
-import org.meteor.ddp.JsonMessageConverter;
-import org.meteor.ddp.Tab;
+import org.meteor.ddp.*;
 import org.meteor.ddp.subscription.message.AddedMessage;
 import org.mockito.ArgumentCaptor;
 
@@ -77,9 +74,9 @@ public class MapSubscriptionAdapterTest {
 
         final Set<Object> results = new HashSet<>();
 
-        client.registerHandler(AddedMessage.class, message -> {
+        client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
+        });
 
         client.connect("ws://example.com/websocket");
 
@@ -117,9 +114,9 @@ public class MapSubscriptionAdapterTest {
 
         final Set<Object> results = new HashSet<>();
 
-        client.registerHandler(AddedMessage.class, message -> {
+        client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
+        });
 
         client.connect("ws://example.com/websocket");
 

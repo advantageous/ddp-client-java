@@ -22,14 +22,12 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.websocket.*;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoint {
@@ -46,7 +44,7 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
 
     private static final boolean WARN = LOGGER.isWarnEnabled();
 
-    protected final Map<Class, List<InstanceMethodContainer>> handlerMap = new HashMap<>();
+    protected final Map<Class, Map<DDPMessageHandler.Phase, Set<DDPMessageHandler>>> handlerMap = new HashMap<>();
 
     private final WebSocketContainer container;
 
@@ -142,73 +140,41 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
     }
 
     private void notifyHandlers(final Object message) {
-        final List<InstanceMethodContainer> containers = this.handlerMap.get(message.getClass());
-        if (containers == null) return;
-        for (final InstanceMethodContainer container : containers) {
-            try {
-                if (TRACE) LOGGER.trace("notifying handler: " + container);
-                container.getMethod().setAccessible(true);
-                container.getMethod().invoke(container.getInstance(), message);
-            } catch (IllegalAccessException e) {
-                // We scan for only public methods, so this should never happen.
-                throw new IllegalStateException(e);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException(e);
+        final Map<DDPMessageHandler.Phase, Set<DDPMessageHandler>> mapOfHandlerSets = this.handlerMap.get(message.getClass());
+        if (mapOfHandlerSets == null) return;
+        for (DDPMessageHandler.Phase phase : DDPMessageHandler.Phase.values()) {
+            Set<DDPMessageHandler> handlers = mapOfHandlerSets.get(phase);
+            if (handlers == null) continue;
+            for (final DDPMessageHandler handler : handlers) {
+                if (TRACE) LOGGER.trace("notifying handler: " + handler);
+                handler.onMessage(message);
             }
         }
     }
 
     @Override
-    public <T> void registerHandler(final Class<T> messageType,
-                                    final DDPMessageHandler<T> handler,
-                                    final Phase phase) {
+    public void registerHandler(final Class messageType,
+                                final DDPMessageHandler.Phase phase, final DDPMessageHandler handler) {
+
         if (DEBUG) LOGGER.debug("registering handler: " + handler.getClass().getName());
 
-        final Method method;
-        try {
-            method = handler.getClass().getMethod("onMessage", Object.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e);
+        Map<DDPMessageHandler.Phase, Set<DDPMessageHandler>> mapOfHandlerSets = handlerMap.get(messageType);
+        if (mapOfHandlerSets == null) {
+            mapOfHandlerSets = new HashMap<>(3);
         }
-
-        // Make sure there is only one method argument
-        if (method.getParameterTypes().length != 1) {
-            throw new IllegalArgumentException(
-                    "handler methods may only have one argument; the message object");
+        Set<DDPMessageHandler> handlers = mapOfHandlerSets.get(phase);
+        if (handlers == null) {
+            handlers = new HashSet<>();
         }
-
-        List<InstanceMethodContainer> handlerMethods = handlerMap.get(messageType);
-        if (handlerMethods == null) {
-            handlerMethods = new LinkedList<>();
-        }
-
-        final InstanceMethodContainer val = new InstanceMethodContainer(method, handler, phase.ordinal());
-
-        //Put the item in the correct order in the list
-        if (handlerMethods.size() == 0) {
-            handlerMethods.add(val);
-        } else if (handlerMethods.get(0).getOrder() > val.getOrder()) {
-            handlerMethods.add(0, val);
-        } else if (handlerMethods.get(handlerMethods.size() - 1).getOrder() < val.getOrder()) {
-            handlerMethods.add(handlerMethods.size(), val);
-        } else {
-            int i = 0;
-            while (handlerMethods.get(i).getOrder() < val.getOrder()) {
-                i++;
-            }
-            handlerMethods.add(i, val);
-        }
-
-        handlerMap.put(messageType, handlerMethods);
-
+        handlers.add(handler);
+        mapOfHandlerSets.put(phase, handlers);
+        handlerMap.put(messageType, mapOfHandlerSets);
     }
 
     @Override
     public <T> void registerHandler(final Class<T> messageType,
                                     final DDPMessageHandler<T> handler) {
-        registerHandler(messageType, handler, Phase.UPDATE);
+        registerHandler(messageType, DDPMessageHandler.Phase.UPDATE, handler);
     }
 
     @Override
@@ -228,38 +194,5 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
         this.websocketSession.getAsyncRemote().sendText(convertedMessage);
     }
 
-    protected static final class InstanceMethodContainer {
-        private Method method;
 
-        private Object instance;
-
-        private int order;
-
-        private InstanceMethodContainer(Method method, Object instance, int order) {
-            this.method = method;
-            this.instance = instance;
-            this.order = order;
-        }
-
-        public Method getMethod() {
-            return method;
-        }
-
-        public Object getInstance() {
-            return instance;
-        }
-
-        public int getOrder() {
-            return order;
-        }
-
-        @Override
-        public String toString() {
-            return "InstanceMethodContainer{" +
-                    "method=" + method +
-                    ", instance=" + instance +
-                    ", order=" + order +
-                    '}';
-        }
-    }
 }

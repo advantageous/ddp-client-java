@@ -31,8 +31,7 @@ public interface DDPMessageEndpoint {
     void connect(String address) throws IOException, InterruptedException;
 
     <T> void registerHandler(Class<T> messageType,
-                             DDPMessageHandler<T> handler,
-                             Phase phase);
+                             DDPMessageHandler.Phase phase, DDPMessageHandler<T> handler);
 
     <T> void registerHandler(Class<T> messageType,
                              DDPMessageHandler<T> handler);
@@ -41,7 +40,4 @@ public interface DDPMessageEndpoint {
 
     void send(Object message) throws IOException;
 
-    public static enum Phase {
-        BEFORE_UPDATE, UPDATE, AFTER_UPDATE
-    }
 }
