@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.DDPMessageHandler;
 import org.meteor.ddp.MessageConverterJson;
 import org.meteor.ddp.Tab;
 import org.mockito.ArgumentCaptor;
@@ -61,7 +62,6 @@ public class MapSubscriptionAdapterTest {
 
     }
 
-
     @Test
     @SuppressWarnings("unchecked")
     public void testAdded() throws Exception {
@@ -78,7 +78,7 @@ public class MapSubscriptionAdapterTest {
 
         client.registerHandler(AddedMessage.class, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        });
+        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
 
         client.connect("ws://example.com/websocket");
 
@@ -118,7 +118,7 @@ public class MapSubscriptionAdapterTest {
 
         client.registerHandler(AddedMessage.class, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        });
+        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
 
         client.connect("ws://example.com/websocket");
 
