@@ -21,14 +21,14 @@ import org.junit.Test;
 
 import java.util.Date;
 
-public class MessageConverterJsonTest {
+public class JsonMessageConverterTest {
 
     @Test
     public void testConversionToDdp() throws Exception {
         MyTestClass foo = new MyTestClass();
         foo.setName("Hello, world!");
         foo.setDate(new Date());
-        MessageConverterJson converter = new MessageConverterJson();
+        JsonMessageConverter converter = new JsonMessageConverter();
         String result = converter.toDDP(foo);
         System.out.println(result);
         Assert.assertTrue(result.contains("Hello, world!"));

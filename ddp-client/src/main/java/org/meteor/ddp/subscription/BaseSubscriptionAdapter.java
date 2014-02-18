@@ -18,11 +18,14 @@ package org.meteor.ddp.subscription;
 
 import org.meteor.ddp.ConnectedMessage;
 import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.OnMessage;
+import org.meteor.ddp.subscription.message.NoSubscriptionMessage;
+import org.meteor.ddp.subscription.message.ReadyMessage;
+import org.meteor.ddp.subscription.message.SubscribeMessage;
+import org.meteor.ddp.subscription.message.UnsubscribeMessage;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -42,17 +45,47 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
 
     protected final DDPMessageEndpoint messageEndpoint;
 
-    protected final Set<Subscription> subscriptions;
+    protected final Subscription[] subscriptions;
 
+    @Inject
     public BaseSubscriptionAdapter(final DDPMessageEndpoint messageEndpoint,
-                                   final Set<Subscription> subscriptions,
+                                   final Subscription[] subscriptions,
                                    final ObjectConverter objectConverter) {
 
         this.objectConverter = objectConverter;
         this.subscriptions = subscriptions;
         this.messageEndpoint = messageEndpoint;
+
+        messageEndpoint.registerHandler(ConnectedMessage.class, message -> {
+            for (final Subscription subscription : subscriptions) {
+                try {
+                    subscribe(subscription);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new IllegalStateException(e);
+                }
+            }
+        });
+        messageEndpoint.registerHandler(ReadyMessage.class, message -> {
+            for (final String sub : message.getSubs()) {
+                final Subscription.Callback callback = this.callbackMap.get(sub);
+                if (callback != null) {
+                    callback.onReady(sub);
+                    this.callbackMap.remove(sub);
+                }
+            }
+        });
+        messageEndpoint.registerHandler(NoSubscriptionMessage.class, message -> {
+            final Subscription.Callback callback = this.callbackMap.get(message.getId());
+            if (callback != null) {
+                callback.onFailure(message.getId(), message.getError());
+                this.callbackMap.remove(message.getId());
+            }
+        });
+
     }
 
+    @Override
     public void subscribe(Subscription subscription) throws IOException {
         final Long subscriptionId = SEQUENCE.getAndIncrement();
         final String id = subscriptionId.toString();
@@ -74,33 +107,6 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
         final UnsubscribeMessage message = new UnsubscribeMessage();
         message.setId(subscriptionId);
         messageEndpoint.send(message);
-    }
-
-    @OnMessage
-    public void handleConnected(ConnectedMessage message) throws IOException {
-        for (final Subscription subscription : subscriptions) {
-            subscribe(subscription);
-        }
-    }
-
-    @OnMessage
-    public void handleReady(final ReadyMessage message) {
-        for (final String sub : message.getSubs()) {
-            final Subscription.Callback callback = this.callbackMap.get(sub);
-            if (callback != null) {
-                callback.onReady(sub);
-                this.callbackMap.remove(sub);
-            }
-        }
-    }
-
-    @OnMessage
-    public void handleNoSub(final NoSubscriptionMessage message) {
-        final Subscription.Callback callback = this.callbackMap.get(message.getId());
-        if (callback != null) {
-            callback.onFailure(message.getId(), message.getError());
-            this.callbackMap.remove(message.getId());
-        }
     }
 
     public ObjectConverter getObjectConverter() {

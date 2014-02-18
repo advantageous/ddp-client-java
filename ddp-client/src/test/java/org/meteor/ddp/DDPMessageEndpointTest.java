@@ -44,34 +44,29 @@ public class DDPMessageEndpointTest {
 
     @Test
     public void testRegisterHandler() throws Exception {
-        DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, null);
-        client.registerHandler(new Object() {
-            @OnMessage
-            public void handleReady(ConnectedMessage message) {
-            }
+        DDPMessageEndpointImpl client = new DDPMessageEndpointImpl(wsContainer, null);
+        client.registerHandler(ConnectedMessage.class, message -> {
         });
-        List<DDPMessageEndpoint.InstanceMethodContainer> methods = client.handlerMap.get(ConnectedMessage.class);
+        List<DDPMessageEndpointImpl.InstanceMethodContainer> methods = client.handlerMap.get(ConnectedMessage.class);
         assertEquals(2, methods.size());
     }
 
     /**
      * TODO: Make this test actually mock the Session and verify that the connection happens
+     *
      * @throws Exception
      */
     @Test
     public void testConnectAndDisconnect() throws Exception {
 
-        final DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, new MessageConverterJson());
-        client.registerHandler(new Object() {
-            @OnMessage
-            private void handleConnected(ConnectedMessage message) {
-            }
+        final DDPMessageEndpoint client = new DDPMessageEndpointImpl(wsContainer, new JsonMessageConverter());
+        client.registerHandler(ConnectedMessage.class, message -> {
         });
 
         client.connect(WS_URL);
         ArgumentCaptor<URI> arg = ArgumentCaptor.forClass(URI.class);
 
-        verify(this.wsContainer).connectToServer(any(DDPMessageEndpoint.class), any(ClientEndpointConfig.class), arg.capture());
+        verify(this.wsContainer).connectToServer(any(DDPMessageEndpointImpl.class), any(ClientEndpointConfig.class), arg.capture());
 
         Assert.assertEquals(new URI(WS_URL), arg.getValue());
 

@@ -17,17 +17,18 @@
 package org.meteor.sample;
 
 import com.google.common.eventbus.EventBus;
-import org.meteor.ddp.OnMessage;
-import org.meteor.ddp.subscription.AddedBeforeMessage;
-import org.meteor.ddp.subscription.AddedMessage;
-import org.meteor.ddp.subscription.ChangedMessage;
-import org.meteor.ddp.subscription.RemovedMessage;
+import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.subscription.message.AddedBeforeMessage;
+import org.meteor.ddp.subscription.message.AddedMessage;
+import org.meteor.ddp.subscription.message.ChangedMessage;
+import org.meteor.ddp.subscription.message.RemovedMessage;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.meteor.ddp.DDPMessageEndpoint.*;
 import static org.meteor.sample.WebApplicationConstants.TABS_COLLECTION_NAME;
 
 /**
@@ -42,6 +43,7 @@ public class SubscriptionEventDispatcher {
 
     @Inject
     public SubscriptionEventDispatcher(final EventBus eventBus,
+                                       final DDPMessageEndpoint endpoint,
                                        final @Named("Local Data Map") Map<String, Map<String, Object>> dataMap) {
 
         this.register(TABS_COLLECTION_NAME, new SubscriptionEventHandler() {
@@ -60,31 +62,33 @@ public class SubscriptionEventDispatcher {
                 eventBus.post(new TabRemovedEvent(key));
             }
         });
+
+        endpoint.registerHandler(AddedMessage.class, this::handleAdded, Phase.AFTER_UPDATE);
+        endpoint.registerHandler(AddedBeforeMessage.class, this::handleAddedBefore, Phase.AFTER_UPDATE);
+        endpoint.registerHandler(ChangedMessage.class, this::handleChanged, Phase.AFTER_UPDATE);
+        endpoint.registerHandler(RemovedMessage.class, this::handleRemoved, Phase.AFTER_UPDATE);
+
     }
 
-    public void register(final String collection, final SubscriptionEventHandler handler) {
+    private void register(final String collection, final SubscriptionEventHandler handler) {
         handlerMap.put(collection, handler);
     }
 
-    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleAdded(final AddedMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleAdded(message.getId());
     }
 
-    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleAddedBefore(final AddedBeforeMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleAdded(message.getId());
     }
 
-    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleChanged(final ChangedMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleChanged(message.getId());
     }
 
-    @OnMessage(OnMessage.Phase.AFTER_UPDATE)
     public void handleRemoved(final RemovedMessage message) {
         final SubscriptionEventHandler handler = this.handlerMap.get(message.getCollection());
         if (handler != null) handler.handleRemoved(message.getId());

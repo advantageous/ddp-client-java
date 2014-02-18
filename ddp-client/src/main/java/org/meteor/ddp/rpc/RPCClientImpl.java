@@ -18,8 +18,8 @@ package org.meteor.ddp.rpc;
 
 import org.meteor.ddp.DDPError;
 import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.OnMessage;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,9 +39,34 @@ public class RPCClientImpl implements RPCClient {
 
     private final DDPMessageEndpoint client;
 
+    @Inject
     public RPCClientImpl(final DDPMessageEndpoint client) {
         this.client = client;
-        this.client.registerHandler(this);
+        this.client.registerHandler(ResultMessage.class, result -> {
+            final DeferredMethodInvocation invocation = CALLBACK_MAP.get(result.getId());
+
+            // Exit early if this message wasn't for us.
+            if (invocation == null) return;
+            final DDPError error = result.getError();
+            if (error != null) {
+                invocation.getCallback().onFailure(error);
+                CALLBACK_MAP.remove(result.getId());
+                return;
+            }
+            invocation.setResult(result.getResult());
+            invocation.setHasResult(true);
+            invokeIfReady(invocation);
+        });
+        this.client.registerHandler(UpdatedMessage.class, updatedMessage -> {
+            for (String thisId : updatedMessage.getMethods()) {
+                final DeferredMethodInvocation invocation = CALLBACK_MAP.get(thisId);
+
+                // Exit early if this message wasn't for us.
+                if (invocation == null) continue;
+                invocation.setHasUpdated(true);
+                invokeIfReady(invocation);
+            }
+        });
     }
 
     private static void invokeIfReady(final DeferredMethodInvocation invocation) {
@@ -64,40 +89,6 @@ public class RPCClientImpl implements RPCClient {
         message.setMethod(methodName);
         message.setParams(params);
         client.send(message);
-    }
-
-    /**
-     * associate the result with the method invocation id returned by the server
-     *
-     * @param result the result the was supplied by the server
-     */
-    @OnMessage
-    public void handleResult(final ResultMessage result) {
-        final DeferredMethodInvocation invocation = CALLBACK_MAP.get(result.getId());
-
-        // Exit early if this message wasn't for us.
-        if (invocation == null) return;
-        final DDPError error = result.getError();
-        if (error != null) {
-            invocation.getCallback().onFailure(error);
-            CALLBACK_MAP.remove(result.getId());
-            return;
-        }
-        invocation.setResult(result.getResult());
-        invocation.setHasResult(true);
-        invokeIfReady(invocation);
-    }
-
-    @OnMessage
-    public void handleUpdated(final UpdatedMessage updatedMessage) {
-        for (String thisId : updatedMessage.getMethods()) {
-            final DeferredMethodInvocation invocation = CALLBACK_MAP.get(thisId);
-
-            // Exit early if this message wasn't for us.
-            if (invocation == null) continue;
-            invocation.setHasUpdated(true);
-            invokeIfReady(invocation);
-        }
     }
 
     private static final class DeferredMethodInvocation {

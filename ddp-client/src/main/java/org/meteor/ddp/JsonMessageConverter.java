@@ -27,7 +27,7 @@ import java.util.Map;
  * @author geoffc@gmail.com
  * @since 1/17/14 at 9:27 PM.
  */
-public class MessageConverterJson implements MessageConverter {
+public class JsonMessageConverter implements MessageConverter {
 
     private static final Gson GSON = new Gson();
 

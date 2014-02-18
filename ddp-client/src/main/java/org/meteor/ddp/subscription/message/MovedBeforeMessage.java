@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp.subscription.message;
 
 /**
- * Message indicating that a document has been remotely removed from a subscription.
+ * Message indicating that a document has been remotely moved in a subscription at a specific position in the order.
  *
  * @author geoffc@gmail.com
  * @since 1/17/14 at 6:17 PM.
  */
 
-public class RemovedMessage {
+public class MovedBeforeMessage {
 
     private String collection;
 
     private String id;
+
+    private String before;
 
     public String getCollection() {
         return collection;
@@ -45,11 +47,11 @@ public class RemovedMessage {
         this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return "RemovedMessage{" +
-                "collection='" + collection + '\'' +
-                ", id='" + id + '\'' +
-                '}';
+    public String getBefore() {
+        return before;
+    }
+
+    public void setBefore(String before) {
+        this.before = before;
     }
 }

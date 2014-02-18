@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.meteor.ddp.subscription.message;
 
 /**
- * Subscribe to ddp messages.
+ * Indicates that a subscription is ready. (All the data has been sent)
  *
  * @author geoffc@gmail.com
- * @since 1/17/14 at 7:44 PM.
+ * @since 1/17/14 at 6:05 PM.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface OnMessage {
 
-    public Phase value() default Phase.UPDATE;
+public class ReadyMessage {
 
-    public enum Phase {
-        BEFORE_UPDATE, UPDATE, AFTER_UPDATE
+    private String[] subs;
+
+    public String[] getSubs() {
+        return subs;
+    }
+
+    public void setSubs(String[] subs) {
+        this.subs = subs;
     }
 }

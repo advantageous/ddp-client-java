@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp.subscription.message;
 
 import com.google.gson.JsonObject;
 
 /**
- * Message indicating that a document has been remotely added to a subscription.
+ * Message indicating that a document has been remotely added to a subscription at a specific position in the order.
  *
  * @author geoffc@gmail.com
  * @since 1/17/14 at 6:17 PM.
  */
-public class AddedMessage {
+
+public class AddedBeforeMessage {
 
     private String collection;
 
     private String id;
 
     private JsonObject fields;
+
+    private String before;
 
     public String getCollection() {
         return collection;
@@ -56,12 +59,21 @@ public class AddedMessage {
         this.fields = fields;
     }
 
+    public String getBefore() {
+        return before;
+    }
+
+    public void setBefore(String before) {
+        this.before = before;
+    }
+
     @Override
     public String toString() {
-        return "Added{" +
+        return "AddedBeforeMessage{" +
                 "collection='" + collection + '\'' +
                 ", id='" + id + '\'' +
                 ", fields=" + fields +
+                ", before='" + before + '\'' +
                 '}';
     }
 }

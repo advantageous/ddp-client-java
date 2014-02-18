@@ -14,30 +14,23 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp.subscription.message;
+
 
 /**
- * Message indicating that a document has been remotely moved in a subscription at a specific position in the order.
+ * Subscribe Message
  *
  * @author geoffc@gmail.com
- * @since 1/17/14 at 6:17 PM.
+ * @since 1/17/14 at 5:13 PM.
  */
 
-public class MovedBeforeMessage {
-
-    private String collection;
+public class SubscribeMessage {
 
     private String id;
 
-    private String before;
+    private String name;
 
-    public String getCollection() {
-        return collection;
-    }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }
+    private Object[] params;
 
     public String getId() {
         return id;
@@ -47,11 +40,19 @@ public class MovedBeforeMessage {
         this.id = id;
     }
 
-    public String getBefore() {
-        return before;
+    public String getName() {
+        return name;
     }
 
-    public void setBefore(String before) {
-        this.before = before;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object[] getParams() {
+        return params;
+    }
+
+    public void setParams(Object[] params) {
+        this.params = params;
     }
 }

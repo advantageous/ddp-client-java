@@ -36,6 +36,7 @@ subprojects {
 
 project(':ddp-client') {
     dependencies {
+        compile 'javax.inject:javax.inject:1'
         compile 'com.google.code.gson:gson:2.2.4'
         compile 'commons-beanutils:commons-beanutils:1.9.1'
         compile 'javax.websocket:javax.websocket-api:1.0'

@@ -24,12 +24,6 @@ package org.meteor.ddp;
  */
 public interface DDPMessageHandler<T> {
 
-    public interface Subscription<T> extends DDPMessageHandler<T> {
-        void onMessage(T message);
-    }
-
-    public interface RPC<T> extends DDPMessageHandler<T> {
-        void onMessage(T message);
-    }
+    void onMessage(T message);
 
 }

@@ -40,23 +40,21 @@ public class RPCClientTest {
     @Test
     public void testCall() throws Exception {
 
-        DDPMessageEndpoint endpoint = new DDPMessageEndpoint(this.wsContainer, new MessageConverterJson());
+        DDPMessageEndpoint endpoint = new DDPMessageEndpointImpl(this.wsContainer, new JsonMessageConverter());
 
         final RPCClient rpcClient = new RPCClientImpl(endpoint);
 
-        endpoint.registerHandler(new Object() {
+        endpoint.registerHandler(ConnectedMessage.class, message -> {
 
-            @OnMessage
-            private void handleConnected(ConnectedMessage message) throws IOException {
+            MyTestClass one = new MyTestClass();
+            one.setName("First Object");
+            MyTestClass two = new MyTestClass();
+            two.setName("Second Object");
+            two.setDate(new Date());
+            MyTestClass three = new MyTestClass();
+            three.setDate(new Date());
 
-                MyTestClass one = new MyTestClass();
-                one.setName("First Object");
-                MyTestClass two = new MyTestClass();
-                two.setName("Second Object");
-                two.setDate(new Date());
-                MyTestClass three = new MyTestClass();
-                three.setDate(new Date());
-
+            try {
                 rpcClient.call("addTab", new Object[]{one, two, three}, new AsyncCallback<Object>() {
                     @Override
                     public void onSuccess(Object result) {
@@ -67,6 +65,9 @@ public class RPCClientTest {
                         Assert.fail(message.getReason());
                     }
                 });
+            } catch (IOException e) {
+                e.printStackTrace();
+                Assert.fail(e.getMessage());
             }
         });
 
