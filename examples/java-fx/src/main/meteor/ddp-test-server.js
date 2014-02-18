@@ -17,6 +17,7 @@ if (Meteor.isClient) {
     Template.newTab.events({
         'submit': function (e, tmpl) {
             var tab = extractData(e.currentTarget);
+            tab.total = Number(tab.total);
             Tabs.insert(tab);
             return false;
         }
