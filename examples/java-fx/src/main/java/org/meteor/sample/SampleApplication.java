@@ -56,7 +56,7 @@ public class SampleApplication extends Application {
 
         injector.injectMembers(this);
 
-        endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error("error: " + message.getReason()));
+        endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.getReason()));
 
     }
 
