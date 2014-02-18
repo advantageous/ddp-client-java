@@ -16,6 +16,7 @@
 
 package org.meteor.sample;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import org.glassfish.tyrus.client.ClientManager;
@@ -42,10 +43,12 @@ public class SampleApplicationModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(WebSocketContainer.class).toInstance(ClientManager.createClient());
-        bind(MessageConverter.class).to(JsonMessageConverter.class);
-        bind(ObjectConverter.class).to(JsonObjectConverter.class);
+        bind(MessageConverter.class).to(JsonMessageConverter.class).in(Singleton.class);
+        bind(ObjectConverter.class).to(JsonObjectConverter.class).in(Singleton.class);
         bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).asEagerSingleton();
-        bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class);
+        bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class).in(Singleton.class);
+        bind(SubscriptionEventDispatcher.class).asEagerSingleton();
+        bind(EventBus.class).in(Singleton.class);
     }
 
     @Provides
