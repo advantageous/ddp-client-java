@@ -86,7 +86,7 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
     }
 
     @Override
-    public void subscribe(Subscription subscription) throws IOException {
+    public void subscribe(final Subscription subscription) throws IOException {
         final Long subscriptionId = SEQUENCE.getAndIncrement();
         final String id = subscriptionId.toString();
         final Subscription.Callback callback = subscription.getCallback();

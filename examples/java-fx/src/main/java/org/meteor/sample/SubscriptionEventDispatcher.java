@@ -18,7 +18,6 @@ package org.meteor.sample;
 
 import com.google.common.eventbus.EventBus;
 import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.DDPMessageHandler;
 import org.meteor.ddp.subscription.message.AddedBeforeMessage;
 import org.meteor.ddp.subscription.message.AddedMessage;
 import org.meteor.ddp.subscription.message.ChangedMessage;
@@ -29,6 +28,7 @@ import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.meteor.ddp.DDPMessageHandler.Phase;
 import static org.meteor.sample.WebApplicationConstants.TABS_COLLECTION_NAME;
 
 /**
@@ -63,10 +63,10 @@ public class SubscriptionEventDispatcher {
             }
         });
 
-        endpoint.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, this::handleAdded);
-        endpoint.registerHandler(AddedBeforeMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, this::handleAddedBefore);
-        endpoint.registerHandler(ChangedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, this::handleChanged);
-        endpoint.registerHandler(RemovedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, this::handleRemoved);
+        endpoint.registerHandler(AddedMessage.class, Phase.AFTER_UPDATE, this::handleAdded);
+        endpoint.registerHandler(AddedBeforeMessage.class, Phase.AFTER_UPDATE, this::handleAddedBefore);
+        endpoint.registerHandler(ChangedMessage.class, Phase.AFTER_UPDATE, this::handleChanged);
+        endpoint.registerHandler(RemovedMessage.class, Phase.AFTER_UPDATE, this::handleRemoved);
 
     }
 

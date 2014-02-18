@@ -42,13 +42,18 @@ public class SampleApplicationModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(WebSocketContainer.class).toInstance(ClientManager.createClient());
         bind(MessageConverter.class).to(JsonMessageConverter.class).in(Singleton.class);
         bind(ObjectConverter.class).to(JsonObjectConverter.class).in(Singleton.class);
         bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).asEagerSingleton();
         bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class).in(Singleton.class);
         bind(SubscriptionEventDispatcher.class).asEagerSingleton();
         bind(EventBus.class).in(Singleton.class);
+    }
+
+    @Provides
+    @Singleton
+    WebSocketContainer provideContainer() {
+        return ClientManager.createClient();
     }
 
     @Provides
@@ -60,6 +65,12 @@ public class SampleApplicationModule extends AbstractModule {
         };
     }
 
+    /**
+     * In this example we just use a new HashMap, but the intention here is you could have a map provider by something
+     * like Hazelcast, JGroups, Memcached, etc.
+     *
+     * @return the map interface for your local data
+     */
     @Provides
     @Singleton
     @Named("Local Data Map")
