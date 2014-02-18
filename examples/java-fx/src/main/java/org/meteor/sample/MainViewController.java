@@ -47,36 +47,25 @@ public class MainViewController implements Initializable {
 
     @Subscribe
     public void handleAdded(final TabAddedEvent event) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                final TabView view = new TabView(event.getTab());
-                itemMap.put(event.getKey(), view);
-                scrollingVBox.getChildren().add(view);
-            }
+        Platform.runLater(() -> {
+            final TabView view = new TabView(event.getTab());
+            itemMap.put(event.getKey(), view);
+            scrollingVBox.getChildren().add(view);
         });
     }
 
     @Subscribe
     public void handleRemoved(final TabRemovedEvent event) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                final TabView node = itemMap.get(event.getKey());
-                scrollingVBox.getChildren().remove(node);
-                itemMap.remove(event.getKey());
-            }
+        Platform.runLater(() -> {
+            final TabView node = itemMap.get(event.getKey());
+            scrollingVBox.getChildren().remove(node);
+            itemMap.remove(event.getKey());
         });
     }
 
     @Subscribe
     public void handleModified(final TabUpdatedEvent event) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                itemMap.get(event.getKey()).setTab(event.getTab());
-            }
-        });
+        Platform.runLater(() -> itemMap.get(event.getKey()).setTab(event.getTab()));
     }
 
     @Override
