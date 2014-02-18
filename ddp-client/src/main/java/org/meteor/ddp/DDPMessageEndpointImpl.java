@@ -78,13 +78,18 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
         if (INFO) LOGGER.info("websocket connected ... " + session.getId());
 
         this.websocketSession = session;
-        websocketSession.addMessageHandler((MessageHandler.Whole<String>) rawMessage -> {
-            if (TRACE) LOGGER.trace("raw message: " + rawMessage);
-            try {
-                final Object message = messageConverter.fromDDP(rawMessage);
-                if (message != null) notifyHandlers(message);
-            } catch (UnsupportedMessageException e) {
-                if (WARN) LOGGER.warn("unhandled message from server: " + e.getMessage());
+
+        //This will one day be a lambda, but for now, lambdas blow up Tyrus
+        websocketSession.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
+            public void onMessage(String rawMessage) {
+                if (TRACE) LOGGER.trace("raw message: " + rawMessage);
+                try {
+                    final Object message = messageConverter.fromDDP(rawMessage);
+                    if (message != null) notifyHandlers(message);
+                } catch (UnsupportedMessageException e) {
+                    if (WARN) LOGGER.warn("unhandled message from server: " + e.getMessage());
+                }
             }
         });
 
@@ -141,6 +146,7 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
         if (containers == null) return;
         for (final InstanceMethodContainer container : containers) {
             try {
+                if (TRACE) LOGGER.trace("notifying handler: " + container);
                 container.getMethod().setAccessible(true);
                 container.getMethod().invoke(container.getInstance(), message);
             } catch (IllegalAccessException e) {
@@ -245,6 +251,15 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
 
         public int getOrder() {
             return order;
+        }
+
+        @Override
+        public String toString() {
+            return "InstanceMethodContainer{" +
+                    "method=" + method +
+                    ", instance=" + instance +
+                    ", order=" + order +
+                    '}';
         }
     }
 }
