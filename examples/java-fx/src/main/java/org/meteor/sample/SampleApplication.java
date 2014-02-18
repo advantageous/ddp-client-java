@@ -77,7 +77,7 @@ public class SampleApplication extends Application {
                 protected Void call() throws Exception {
                     endpoint.connect("ws://localhost:3000/websocket");
                     endpoint.await();
-                    LOGGER.warn("disconected from endpoint");
+                    LOGGER.warn("disconnected from endpoint");
                     return null;
                 }
             };
