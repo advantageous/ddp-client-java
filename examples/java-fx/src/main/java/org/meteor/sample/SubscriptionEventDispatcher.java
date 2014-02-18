@@ -28,6 +28,7 @@ import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.meteor.ddp.DDPMessageEndpoint.*;
 import static org.meteor.sample.WebApplicationConstants.TABS_COLLECTION_NAME;
 
 /**
@@ -62,10 +63,10 @@ public class SubscriptionEventDispatcher {
             }
         });
 
-        endpoint.registerHandler(AddedMessage.class, this::handleAdded, DDPMessageEndpoint.Phase.AFTER_UPDATE);
-        endpoint.registerHandler(AddedBeforeMessage.class, this::handleAddedBefore, DDPMessageEndpoint.Phase.AFTER_UPDATE);
-        endpoint.registerHandler(ChangedMessage.class, this::handleChanged, DDPMessageEndpoint.Phase.AFTER_UPDATE);
-        endpoint.registerHandler(RemovedMessage.class, this::handleRemoved, DDPMessageEndpoint.Phase.AFTER_UPDATE);
+        endpoint.registerHandler(AddedMessage.class, this::handleAdded, Phase.AFTER_UPDATE);
+        endpoint.registerHandler(AddedBeforeMessage.class, this::handleAddedBefore, Phase.AFTER_UPDATE);
+        endpoint.registerHandler(ChangedMessage.class, this::handleChanged, Phase.AFTER_UPDATE);
+        endpoint.registerHandler(RemovedMessage.class, this::handleRemoved, Phase.AFTER_UPDATE);
 
     }
 
