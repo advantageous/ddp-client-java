@@ -139,6 +139,7 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
         });
     }
 
+    @SuppressWarnings("unchecked")
     private void notifyHandlers(final Object message) {
         final Map<DDPMessageHandler.Phase, Set<DDPMessageHandler>> mapOfHandlerSets = this.handlerMap.get(message.getClass());
         if (mapOfHandlerSets == null) return;
@@ -193,6 +194,4 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
         if (DEBUG) LOGGER.debug("sending message: " + convertedMessage);
         this.websocketSession.getAsyncRemote().sendText(convertedMessage);
     }
-
-
 }
