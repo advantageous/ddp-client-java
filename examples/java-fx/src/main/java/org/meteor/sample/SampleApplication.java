@@ -22,7 +22,6 @@ import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.meteor.ddp.DDPMessageEndpoint;
@@ -45,19 +44,18 @@ public class SampleApplication extends Application {
 
     {
         final Injector injector = Guice.createInjector(new SampleApplicationModule());
-
         final FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
         loader.setControllerFactory(injector::getInstance);
         try {
             loader.load();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IllegalStateException(e);
         }
 
         injector.injectMembers(this);
 
         endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.getReason()));
-
     }
 
     public static void main(String[] args) {
@@ -66,18 +64,12 @@ public class SampleApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
-        MeteorService thread = new MeteorService();
-        thread.start();
-
-        Parent root = mainController.getRoot();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
+        new MeteorService().start();
+        stage.setScene(new Scene(mainController.getRoot()));
         stage.show();
     }
 
     class MeteorService extends Service {
-
         @Override
         protected Task createTask() {
             return new Task<Void>() {
