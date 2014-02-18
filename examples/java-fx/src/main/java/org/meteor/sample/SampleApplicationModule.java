@@ -16,22 +16,20 @@
 
 package org.meteor.sample;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import org.glassfish.tyrus.client.ClientManager;
 import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.DDPMessageEndpointImpl;
+import org.meteor.ddp.JsonMessageConverter;
 import org.meteor.ddp.MessageConverter;
-import org.meteor.ddp.MessageConverterJson;
-import org.meteor.ddp.subscription.MapSubscriptionAdapter;
-import org.meteor.ddp.subscription.ObjectConverter;
-import org.meteor.ddp.subscription.ObjectConverterJson;
-import org.meteor.ddp.subscription.Subscription;
+import org.meteor.ddp.subscription.*;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.websocket.WebSocketContainer;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Guice module for this sample application.
@@ -43,54 +41,20 @@ public class SampleApplicationModule extends AbstractModule {
 
     @Override
     protected void configure() {
-    }
-
-    @Provides
-    @Singleton
-    EventBus provideEventBus() {
-        return new EventBus();
-    }
-
-    @Provides
-    @Singleton
-    WebSocketContainer provideWebSocketContainer() {
-        return ClientManager.createClient();
-    }
-
-    @Provides
-    @Singleton
-    MessageConverter provideMessageConverter() {
-        return new MessageConverterJson();
-    }
-
-    @Provides
-    @Singleton
-    SubscriptionEventDispatcher provideDispatcher(final EventBus eventBus,
-                                                  final DDPMessageEndpoint endpoint,
-                                                  final @Named("Local Data Map") Map<String, Map<String, Object>> dataMap) {
-        return new SubscriptionEventDispatcher(eventBus, endpoint, dataMap);
-    }
-
-    @Provides
-    @Singleton
-    DDPMessageEndpoint provideWebSocketClient(final WebSocketContainer container,
-                                              final MessageConverter converter) {
-        return new DDPMessageEndpoint(container, converter);
+        bind(WebSocketContainer.class).toInstance(ClientManager.createClient());
+        bind(MessageConverter.class).to(JsonMessageConverter.class);
+        bind(ObjectConverter.class).to(JsonObjectConverter.class);
+        bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).asEagerSingleton();
+        bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class);
     }
 
     @Provides
     @Singleton
     @Named("Subscriptions")
-    Set<Subscription> provideSubscriptions() {
-        return new HashSet<>(Arrays.asList(new Subscription[]{
+    Subscription[] provideSubscriptions() {
+        return new Subscription[]{
                 new Subscription(WebApplicationConstants.TABS_COLLECTION_NAME, Tab.class)
-        }));
-    }
-
-    @Provides
-    @Singleton
-    ObjectConverter provideObjectConverter() {
-        return new ObjectConverterJson();
+        };
     }
 
     @Provides
@@ -98,15 +62,6 @@ public class SampleApplicationModule extends AbstractModule {
     @Named("Local Data Map")
     Map<String, Map<String, Object>> provideDataMap() {
         return new HashMap<>();
-    }
-
-    @Provides
-    @Singleton
-    MapSubscriptionAdapter provideMapSubscriptionAdapter(final DDPMessageEndpoint client,
-                                                         final ObjectConverter objectConverter,
-                                                         final @Named("Subscriptions") Set<Subscription> subscriptions,
-                                                         final @Named("Local Data Map") Map<String, Map<String, Object>> dataMap) {
-        return new MapSubscriptionAdapter(client, subscriptions, objectConverter, dataMap);
     }
 
 }

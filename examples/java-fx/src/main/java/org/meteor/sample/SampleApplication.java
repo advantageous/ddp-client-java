@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.meteor.ddp.DDPMessageEndpoint;
 import org.meteor.ddp.ErrorMessage;
-import org.meteor.ddp.subscription.MapSubscriptionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,16 +38,10 @@ public class SampleApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(SampleApplication.class);
 
     @Inject
-    private DDPMessageEndpoint client;
+    private DDPMessageEndpoint endpoint;
 
     @Inject
     private MainViewController mainController;
-
-    @Inject
-    private SubscriptionEventDispatcher dispatcher;
-
-    @Inject
-    private MapSubscriptionAdapter mapSubscriptionAdapter;
 
     {
         final Injector injector = Guice.createInjector(new SampleApplicationModule());
@@ -63,7 +56,7 @@ public class SampleApplication extends Application {
 
         injector.injectMembers(this);
 
-        client.registerHandler(ErrorMessage.class, message -> LOGGER.error("error: " + message.getReason()));
+        endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error("error: " + message.getReason()));
 
     }
 
@@ -90,8 +83,8 @@ public class SampleApplication extends Application {
             return new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
-                    client.connect("ws://localhost:3000/websocket");
-                    client.await();
+                    endpoint.connect("ws://localhost:3000/websocket");
+                    endpoint.await();
                     LOGGER.warn("disconected from endpoint");
                     return null;
                 }

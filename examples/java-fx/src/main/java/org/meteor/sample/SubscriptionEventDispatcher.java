@@ -18,10 +18,10 @@ package org.meteor.sample;
 
 import com.google.common.eventbus.EventBus;
 import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.subscription.AddedBeforeMessage;
-import org.meteor.ddp.subscription.AddedMessage;
-import org.meteor.ddp.subscription.ChangedMessage;
-import org.meteor.ddp.subscription.RemovedMessage;
+import org.meteor.ddp.subscription.message.AddedBeforeMessage;
+import org.meteor.ddp.subscription.message.AddedMessage;
+import org.meteor.ddp.subscription.message.ChangedMessage;
+import org.meteor.ddp.subscription.message.RemovedMessage;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -69,7 +69,7 @@ public class SubscriptionEventDispatcher {
 
     }
 
-    public void register(final String collection, final SubscriptionEventHandler handler) {
+    private void register(final String collection, final SubscriptionEventHandler handler) {
         handlerMap.put(collection, handler);
     }
 
