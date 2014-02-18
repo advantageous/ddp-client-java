@@ -76,16 +76,13 @@ public class DDPMessageEndpoint extends Endpoint {
         if (INFO) LOGGER.info("websocket connected ... " + session.getId());
 
         this.websocketSession = session;
-        websocketSession.addMessageHandler(new MessageHandler.Whole<String>() {
-            @Override
-            public void onMessage(String rawMessage) {
-                if (TRACE) LOGGER.trace("raw message: " + rawMessage);
-                try {
-                    final Object message = messageConverter.fromDDP(rawMessage);
-                    if (message != null) notifyHandlers(message);
-                } catch (UnsupportedMessageException e) {
-                    if (WARN) LOGGER.warn("unhandled message from server: " + e.getMessage());
-                }
+        websocketSession.addMessageHandler((MessageHandler.Whole<String>) rawMessage -> {
+            if (TRACE) LOGGER.trace("raw message: " + rawMessage);
+            try {
+                final Object message = messageConverter.fromDDP(rawMessage);
+                if (message != null) notifyHandlers(message);
+            } catch (UnsupportedMessageException e) {
+                if (WARN) LOGGER.warn("unhandled message from server: " + e.getMessage());
             }
         });
 
