@@ -17,10 +17,14 @@
 package org.meteor.ddp.subscription;
 
 import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.subscription.message.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Simple subscription adapter to keep a map in sync with a meteor subscription.
@@ -38,10 +42,11 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
     private final Map<String, Map<String, Object>> dataMap;
 
+    @Inject
     public MapSubscriptionAdapter(final DDPMessageEndpoint endpoint,
-                                  final Set<Subscription> subscriptions,
+                                  final @Named("Subscriptions") Subscription[] subscriptions,
                                   final ObjectConverter objectConverter,
-                                  final Map<String, Map<String, Object>> dataMap) {
+                                  final @Named("Local Data Map") Map<String, Map<String, Object>> dataMap) {
 
         super(endpoint, subscriptions, objectConverter);
 
@@ -53,14 +58,6 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
         endpoint.registerHandler(MovedBeforeMessage.class, this::handleMovedBefore);
         endpoint.registerHandler(RemovedMessage.class, this::handleRemoved);
 
-    }
-
-    public MapSubscriptionAdapter(final DDPMessageEndpoint endpoint,
-                                  final Subscription[] subscriptions,
-                                  final ObjectConverter objectConverter,
-                                  final Map<String, Map<String, Object>> dataMap) {
-
-        this(endpoint, new HashSet<>(Arrays.asList(subscriptions)), objectConverter, dataMap);
     }
 
     public void handleAdded(final AddedMessage message) {

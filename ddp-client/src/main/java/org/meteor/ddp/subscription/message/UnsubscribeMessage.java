@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp.subscription.message;
 
 /**
- * Indicates that a subscription is ready. (All the data has been sent)
+ * Message to unsubscribe from a subscription.
  *
  * @author geoffc@gmail.com
  * @since 1/17/14 at 6:05 PM.
  */
 
-public class ReadyMessage {
+public class UnsubscribeMessage {
 
-    private String[] subs;
+    private String id;
 
-    public String[] getSubs() {
-        return subs;
+    public String getId() {
+        return id;
     }
 
-    public void setSubs(String[] subs) {
-        this.subs = subs;
+    public void setId(String id) {
+        this.id = id;
     }
 }

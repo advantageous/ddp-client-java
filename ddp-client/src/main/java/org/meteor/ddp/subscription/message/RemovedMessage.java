@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
-
+package org.meteor.ddp.subscription.message;
 
 /**
- * Subscribe Message
+ * Message indicating that a document has been remotely removed from a subscription.
  *
  * @author geoffc@gmail.com
- * @since 1/17/14 at 5:13 PM.
+ * @since 1/17/14 at 6:17 PM.
  */
 
-public class SubscribeMessage {
+public class RemovedMessage {
+
+    private String collection;
 
     private String id;
 
-    private String name;
+    public String getCollection() {
+        return collection;
+    }
 
-    private Object[] params;
+    public void setCollection(String collection) {
+        this.collection = collection;
+    }
 
     public String getId() {
         return id;
@@ -40,19 +45,11 @@ public class SubscribeMessage {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Object[] getParams() {
-        return params;
-    }
-
-    public void setParams(Object[] params) {
-        this.params = params;
+    @Override
+    public String toString() {
+        return "RemovedMessage{" +
+                "collection='" + collection + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 }

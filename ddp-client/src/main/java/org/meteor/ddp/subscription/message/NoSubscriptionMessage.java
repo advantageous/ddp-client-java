@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp.subscription.message;
 
-import com.google.gson.JsonObject;
+import org.meteor.ddp.DDPError;
 
 /**
- * Message indicating that a document has been remotely added to a subscription.
+ * No Subscription Message
  *
  * @author geoffc@gmail.com
- * @since 1/17/14 at 6:17 PM.
+ * @since 1/17/14 at 6:10 PM.
  */
-public class AddedMessage {
 
-    private String collection;
+public class NoSubscriptionMessage {
 
     private String id;
 
-    private JsonObject fields;
-
-    public String getCollection() {
-        return collection;
-    }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }
+    private DDPError error;
 
     public String getId() {
         return id;
@@ -48,20 +39,11 @@ public class AddedMessage {
         this.id = id;
     }
 
-    public JsonObject getFields() {
-        return fields;
+    public DDPError getError() {
+        return error;
     }
 
-    public void setFields(JsonObject fields) {
-        this.fields = fields;
-    }
-
-    @Override
-    public String toString() {
-        return "Added{" +
-                "collection='" + collection + '\'' +
-                ", id='" + id + '\'' +
-                ", fields=" + fields +
-                '}';
+    public void setError(DDPError error) {
+        this.error = error;
     }
 }

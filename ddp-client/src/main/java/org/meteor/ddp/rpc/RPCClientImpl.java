@@ -19,6 +19,7 @@ package org.meteor.ddp.rpc;
 import org.meteor.ddp.DDPError;
 import org.meteor.ddp.DDPMessageEndpoint;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +39,7 @@ public class RPCClientImpl implements RPCClient {
 
     private final DDPMessageEndpoint client;
 
+    @Inject
     public RPCClientImpl(final DDPMessageEndpoint client) {
         this.client = client;
         this.client.registerHandler(ResultMessage.class, result -> {

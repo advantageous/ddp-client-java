@@ -20,9 +20,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.DDPMessageHandler;
-import org.meteor.ddp.MessageConverterJson;
+import org.meteor.ddp.DDPMessageEndpointImpl;
+import org.meteor.ddp.JsonMessageConverter;
 import org.meteor.ddp.Tab;
+import org.meteor.ddp.subscription.message.AddedMessage;
 import org.mockito.ArgumentCaptor;
 
 import javax.websocket.*;
@@ -68,9 +69,9 @@ public class MapSubscriptionAdapterTest {
 
         final Map<String, Map<String, Object>> localData = new HashMap<>();
 
-        final DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, new MessageConverterJson());
+        final DDPMessageEndpoint client = new DDPMessageEndpointImpl(wsContainer, new JsonMessageConverter());
 
-        final ObjectConverter converter = new ObjectConverterJson();
+        final ObjectConverter converter = new JsonObjectConverter();
 
         new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs")}, converter, localData);
 
@@ -78,11 +79,11 @@ public class MapSubscriptionAdapterTest {
 
         client.registerHandler(AddedMessage.class, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
+        }, DDPMessageEndpointImpl.Phase.AFTER_UPDATE);
 
         client.connect("ws://example.com/websocket");
 
-        ArgumentCaptor<DDPMessageEndpoint> endpointArgumentCaptor = ArgumentCaptor.forClass(DDPMessageEndpoint.class);
+        ArgumentCaptor<DDPMessageEndpointImpl> endpointArgumentCaptor = ArgumentCaptor.forClass(DDPMessageEndpointImpl.class);
 
         when(wsContainer.connectToServer(any(Endpoint.class), any(ClientEndpointConfig.class), any(URI.class))).thenReturn(mockSession);
 
@@ -108,9 +109,9 @@ public class MapSubscriptionAdapterTest {
 
         final Map<String, Map<String, Object>> localData = new HashMap<>();
 
-        final DDPMessageEndpoint client = new DDPMessageEndpoint(wsContainer, new MessageConverterJson());
+        final DDPMessageEndpoint client = new DDPMessageEndpointImpl(wsContainer, new JsonMessageConverter());
 
-        final ObjectConverter converter = new ObjectConverterJson();
+        final ObjectConverter converter = new JsonObjectConverter();
 
         new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs", Tab.class)}, converter, localData);
 
@@ -118,11 +119,11 @@ public class MapSubscriptionAdapterTest {
 
         client.registerHandler(AddedMessage.class, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
+        }, DDPMessageEndpointImpl.Phase.AFTER_UPDATE);
 
         client.connect("ws://example.com/websocket");
 
-        ArgumentCaptor<DDPMessageEndpoint> endpointArgumentCaptor = ArgumentCaptor.forClass(DDPMessageEndpoint.class);
+        ArgumentCaptor<DDPMessageEndpointImpl> endpointArgumentCaptor = ArgumentCaptor.forClass(DDPMessageEndpointImpl.class);
 
         when(wsContainer.connectToServer(any(Endpoint.class), any(ClientEndpointConfig.class), any(URI.class))).thenReturn(mockSession);
 

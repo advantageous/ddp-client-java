@@ -19,10 +19,7 @@ package org.meteor.ddp.rpc;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.meteor.ddp.ConnectedMessage;
-import org.meteor.ddp.DDPError;
-import org.meteor.ddp.DDPMessageEndpoint;
-import org.meteor.ddp.MessageConverterJson;
+import org.meteor.ddp.*;
 
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
@@ -43,7 +40,7 @@ public class RPCClientTest {
     @Test
     public void testCall() throws Exception {
 
-        DDPMessageEndpoint endpoint = new DDPMessageEndpoint(this.wsContainer, new MessageConverterJson());
+        DDPMessageEndpoint endpoint = new DDPMessageEndpointImpl(this.wsContainer, new JsonMessageConverter());
 
         final RPCClient rpcClient = new RPCClientImpl(endpoint);
 

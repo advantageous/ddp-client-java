@@ -30,9 +30,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * Created by gcc on 1/29/14.
  */
-public class ObjectConverterJson implements ObjectConverter {
+public class JsonObjectConverter implements ObjectConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectConverterJson.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonObjectConverter.class);
 
     private static final boolean INFO = LOGGER.isInfoEnabled();
 

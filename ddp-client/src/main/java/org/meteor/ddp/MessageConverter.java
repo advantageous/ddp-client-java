@@ -19,7 +19,7 @@ package org.meteor.ddp;
 import org.meteor.ddp.rpc.MethodMessage;
 import org.meteor.ddp.rpc.ResultMessage;
 import org.meteor.ddp.rpc.UpdatedMessage;
-import org.meteor.ddp.subscription.*;
+import org.meteor.ddp.subscription.message.*;
 
 import java.util.HashMap;
 import java.util.Map;

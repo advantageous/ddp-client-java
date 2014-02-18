@@ -14,36 +14,24 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
-
-import org.meteor.ddp.DDPError;
+package org.meteor.ddp.subscription.message;
 
 /**
- * No Subscription Message
+ * Indicates that a subscription is ready. (All the data has been sent)
  *
  * @author geoffc@gmail.com
- * @since 1/17/14 at 6:10 PM.
+ * @since 1/17/14 at 6:05 PM.
  */
 
-public class NoSubscriptionMessage {
+public class ReadyMessage {
 
-    private String id;
+    private String[] subs;
 
-    private DDPError error;
-
-    public String getId() {
-        return id;
+    public String[] getSubs() {
+        return subs;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public DDPError getError() {
-        return error;
-    }
-
-    public void setError(DDPError error) {
-        this.error = error;
+    public void setSubs(String[] subs) {
+        this.subs = subs;
     }
 }

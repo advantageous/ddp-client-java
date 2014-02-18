@@ -18,10 +18,14 @@ package org.meteor.ddp.subscription;
 
 import org.meteor.ddp.ConnectedMessage;
 import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.subscription.message.NoSubscriptionMessage;
+import org.meteor.ddp.subscription.message.ReadyMessage;
+import org.meteor.ddp.subscription.message.SubscribeMessage;
+import org.meteor.ddp.subscription.message.UnsubscribeMessage;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -41,10 +45,11 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
 
     protected final DDPMessageEndpoint messageEndpoint;
 
-    protected final Set<Subscription> subscriptions;
+    protected final Subscription[] subscriptions;
 
+    @Inject
     public BaseSubscriptionAdapter(final DDPMessageEndpoint messageEndpoint,
-                                   final Set<Subscription> subscriptions,
+                                   final Subscription[] subscriptions,
                                    final ObjectConverter objectConverter) {
 
         this.objectConverter = objectConverter;

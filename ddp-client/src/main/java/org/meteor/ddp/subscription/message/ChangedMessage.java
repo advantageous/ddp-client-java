@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.meteor.ddp.subscription;
+package org.meteor.ddp.subscription.message;
 
 import java.util.Arrays;
 import java.util.HashMap;
