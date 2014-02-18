@@ -79,7 +79,7 @@ public class MapSubscriptionAdapterTest {
 
         client.registerHandler(AddedMessage.class, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        }, DDPMessageEndpointImpl.Phase.AFTER_UPDATE);
+        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
 
         client.connect("ws://example.com/websocket");
 
@@ -119,7 +119,7 @@ public class MapSubscriptionAdapterTest {
 
         client.registerHandler(AddedMessage.class, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
-        }, DDPMessageEndpointImpl.Phase.AFTER_UPDATE);
+        }, DDPMessageEndpoint.Phase.AFTER_UPDATE);
 
         client.connect("ws://example.com/websocket");
 
