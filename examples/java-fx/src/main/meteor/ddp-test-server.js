@@ -36,6 +36,7 @@ if (Meteor.isClient) {
     Template.editTab.events({
         'submit': function (e, tmpl) {
             var tab = extractData(e.currentTarget);
+            tab.total = Number(tab.total);
             Tabs.update({_id: tab._id}, {
                 $set: {name: tab.name, total: tab.total}
             });
