@@ -19,6 +19,12 @@ package org.meteor.sample;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
+import javafx.fxml.FXMLLoader;
 import org.glassfish.tyrus.client.ClientManager;
 import org.meteor.ddp.DDPMessageEndpoint;
 import org.meteor.ddp.DDPMessageEndpointImpl;
@@ -29,6 +35,7 @@ import org.meteor.ddp.subscription.*;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.websocket.WebSocketContainer;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,12 +49,38 @@ public class SampleApplicationModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(SampleApplication.class);
+
         bind(MessageConverter.class).to(JsonMessageConverter.class).in(Singleton.class);
         bind(ObjectConverter.class).to(JsonObjectConverter.class).in(Singleton.class);
         bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).asEagerSingleton();
         bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class).in(Singleton.class);
         bind(SubscriptionEventDispatcher.class).asEagerSingleton();
         bind(EventBus.class).in(Singleton.class);
+
+        bindListener(
+                new AbstractMatcher<TypeLiteral<?>>() {
+                    @Override
+                    public boolean matches(TypeLiteral<?> typeLiteral) {
+                        return typeLiteral.getRawType().isAnnotationPresent(Presents.class);
+                    }
+                },
+                new TypeListener() {
+                    @Override
+                    public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+                        final Presents presents = type.getRawType().getAnnotation(Presents.class);
+                        encounter.register((InjectionListener<I>) injectee -> {
+                            final FXMLLoader loader = new FXMLLoader(injectee.getClass().getResource(presents.value()));
+                            loader.setController(injectee);
+                            try {
+                                loader.load();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    }
+                }
+        );
     }
 
     @Provides

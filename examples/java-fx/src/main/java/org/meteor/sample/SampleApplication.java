@@ -17,11 +17,9 @@
 package org.meteor.sample;
 
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.meteor.ddp.DDPMessageEndpoint;
@@ -30,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.IOException;
 
 public class SampleApplication extends Application {
 
@@ -43,18 +40,7 @@ public class SampleApplication extends Application {
     private MainViewController mainController;
 
     {
-        final Injector injector = Guice.createInjector(new SampleApplicationModule());
-        final FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
-        loader.setControllerFactory(injector::getInstance);
-        try {
-            loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalStateException(e);
-        }
-
-        injector.injectMembers(this);
-
+        Guice.createInjector(new SampleApplicationModule()).injectMembers(this);
         endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.getReason()));
     }
 
@@ -63,7 +49,7 @@ public class SampleApplication extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(final Stage stage) throws Exception {
         new MeteorService().start();
         stage.setScene(new Scene(mainController.getRoot()));
         stage.show();

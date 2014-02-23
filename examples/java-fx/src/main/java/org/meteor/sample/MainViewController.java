@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 @Singleton
+@Presents("MainView.fxml")
 public class MainViewController implements Initializable {
 
     @FXML
