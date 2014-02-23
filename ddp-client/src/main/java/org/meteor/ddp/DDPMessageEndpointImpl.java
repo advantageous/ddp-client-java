@@ -135,7 +135,6 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
             throw new IllegalStateException("The server does not support the DDP version specified by this " +
                     "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
                     DDP_PROTOCOL_VERSION);
-
         });
     }
 
@@ -155,7 +154,8 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
 
     @Override
     public void registerHandler(final Class messageType,
-                                final DDPMessageHandler.Phase phase, final DDPMessageHandler handler) {
+                                final DDPMessageHandler.Phase phase,
+                                final DDPMessageHandler handler) {
 
         if (DEBUG) LOGGER.debug("registering handler: " + handler.getClass().getName());
 

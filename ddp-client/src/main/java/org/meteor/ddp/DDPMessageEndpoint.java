@@ -30,11 +30,9 @@ public interface DDPMessageEndpoint {
 
     void connect(String address) throws IOException, InterruptedException;
 
-    <T> void registerHandler(Class<T> messageType,
-                             DDPMessageHandler.Phase phase, DDPMessageHandler<T> handler);
+    <T> void registerHandler(Class<T> messageType, DDPMessageHandler.Phase phase, DDPMessageHandler<T> handler);
 
-    <T> void registerHandler(Class<T> messageType,
-                             DDPMessageHandler<T> handler);
+    <T> void registerHandler(Class<T> messageType, DDPMessageHandler<T> handler);
 
     void await() throws InterruptedException;
 

@@ -18,10 +18,10 @@ package org.meteor.ddp.subscription;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import org.apache.commons.beanutils.BeanMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,13 +66,17 @@ public class JsonObjectConverter implements ObjectConverter {
     }
 
     @Override
-    public Object updateFields(Object record, Map<String, Object> fields) {
+    public void updateFields(Object record, Map<String, Object> fields) {
         //TODO: handle if this is a hashmap and get/set items
-        final BeanMap beanMap = new BeanMap(record);
         for (final String key : fields.keySet()) {
             final Object thisField = fields.get(key);
-            beanMap.put(key, thisField);
+            try {
+                final Field field = record.getClass().getField(key);
+                field.setAccessible(true);
+                field.set(record, thisField);
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                throw new IllegalArgumentException(e);
+            }
         }
-        return beanMap.getBean();
     }
 }

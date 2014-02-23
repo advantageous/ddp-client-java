@@ -91,8 +91,8 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
         }
         final Object record = localCollection.get(message.getId());
         final Map<String, Object> fields = message.getFields();
-        final Object updated = super.getObjectConverter().updateFields(record, fields);
-        localCollection.put(message.getId(), updated);
+        super.getObjectConverter().updateFields(record, fields);
+        localCollection.put(message.getId(), record);
     }
 
     public void handleMovedBefore(final MovedBeforeMessage message) {

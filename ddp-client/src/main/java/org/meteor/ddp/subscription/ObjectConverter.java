@@ -26,5 +26,5 @@ public interface ObjectConverter {
 
     Object toObject(JsonObject fields, String collectionName);
 
-    Object updateFields(Object record, Map<String, Object> fields);
+    void updateFields(Object record, Map<String, Object> fields);
 }
