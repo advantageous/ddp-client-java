@@ -69,11 +69,11 @@ public class JsonObjectConverter implements ObjectConverter {
     public void updateFields(Object record, Map<String, Object> fields) {
         //TODO: handle if this is a hashmap and get/set items
         for (final String key : fields.keySet()) {
-            final Object thisField = fields.get(key);
+            final Object value = fields.get(key);
             try {
-                final Field field = record.getClass().getField(key);
+                final Field field = record.getClass().getDeclaredField(key);
                 field.setAccessible(true);
-                field.set(record, thisField);
+                field.set(record, value);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 throw new IllegalArgumentException(e);
             }
