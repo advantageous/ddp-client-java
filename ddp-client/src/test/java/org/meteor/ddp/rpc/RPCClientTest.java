@@ -19,7 +19,10 @@ package org.meteor.ddp.rpc;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.meteor.ddp.*;
+import org.meteor.ddp.ConnectedMessage;
+import org.meteor.ddp.DDPMessageEndpoint;
+import org.meteor.ddp.DDPMessageEndpointImpl;
+import org.meteor.ddp.JsonMessageConverter;
 
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
@@ -55,18 +58,11 @@ public class RPCClientTest {
             three.setDate(new Date());
 
             try {
-                rpcClient.call("addTab", new Object[]{one, two, three}, new AsyncCallback<Object>() {
-                    @Override
-                    public void onSuccess(Object result) {
-                    }
-
-                    @Override
-                    public void onFailure(DDPError message) {
-                        Assert.fail(message.getReason());
-                    }
+                rpcClient.call("addTab", new Object[]{one, two, three}, result -> {
+                }, failureMessage -> {
+                    Assert.fail(failureMessage.getReason());
                 });
             } catch (IOException e) {
-                e.printStackTrace();
                 Assert.fail(e.getMessage());
             }
         });

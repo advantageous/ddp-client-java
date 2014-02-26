@@ -49,7 +49,7 @@ public class RPCClientImpl implements RPCClient {
             if (invocation == null) return;
             final DDPError error = result.getError();
             if (error != null) {
-                invocation.getCallback().onFailure(error);
+                invocation.getFailureHandler().onFailure(error);
                 CALLBACK_MAP.remove(result.getId());
                 return;
             }
@@ -71,7 +71,7 @@ public class RPCClientImpl implements RPCClient {
 
     private static void invokeIfReady(final DeferredMethodInvocation invocation) {
         if (invocation.getHasResult() && invocation.getHasUpdated()) {
-            invocation.getCallback().onSuccess(invocation.getResult());
+            invocation.getSuccessHandler().onSuccess(invocation.getResult());
             CALLBACK_MAP.remove(invocation.getId());
         }
     }
@@ -79,11 +79,12 @@ public class RPCClientImpl implements RPCClient {
     @Override
     public void call(final String methodName,
                      final Object[] params,
-                     final AsyncCallback<Object> callback) throws IOException {
+                     final SuccessHandler<Object> successHandler,
+                     final FailureHandler failureHandler) throws IOException {
 
         final Long methodId = SEQUENCE.getAndIncrement();
         final String id = methodId.toString();
-        CALLBACK_MAP.put(id, new DeferredMethodInvocation(id, callback));
+        CALLBACK_MAP.put(id, new DeferredMethodInvocation(id, successHandler, failureHandler));
         final MethodMessage message = new MethodMessage();
         message.setId(id);
         message.setMethod(methodName);
@@ -94,7 +95,9 @@ public class RPCClientImpl implements RPCClient {
     private static final class DeferredMethodInvocation {
         private String id;
 
-        private AsyncCallback<Object> callback;
+        private SuccessHandler<Object> successHandler;
+
+        private FailureHandler failureHandler;
 
         private Object result;
 
@@ -102,21 +105,24 @@ public class RPCClientImpl implements RPCClient {
 
         private Boolean hasUpdated = false;
 
-        private DeferredMethodInvocation(String id, AsyncCallback<Object> callback) {
+        private DeferredMethodInvocation(String id,
+                                         SuccessHandler<Object> successHandler,
+                                         FailureHandler failureHandler) {
             this.id = id;
-            this.callback = callback;
+            this.successHandler = successHandler;
+            this.failureHandler = failureHandler;
         }
 
         public String getId() {
             return id;
         }
 
-        public AsyncCallback<Object> getCallback() {
-            return callback;
+        public SuccessHandler<Object> getSuccessHandler() {
+            return successHandler;
         }
 
-        public void setCallback(AsyncCallback<Object> callback) {
-            this.callback = callback;
+        public FailureHandler getFailureHandler() {
+            return failureHandler;
         }
 
         public Boolean getHasResult() {
