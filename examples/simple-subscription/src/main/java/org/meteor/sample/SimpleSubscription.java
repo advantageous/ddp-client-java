@@ -50,6 +50,10 @@ public class SimpleSubscription {
 
         DDPMessageEndpoint endpoint = new DDPMessageEndpointImpl(container, messageConverter);
 
+        endpoint.registerHandler(ConnectedMessage.class, message ->
+                System.out.println("connected to server! session: " + message.getSession()));
+
+
         Map<String, Map<String, Object>> dataMap = new HashMap<>();
 
         new MapSubscriptionAdapter(
