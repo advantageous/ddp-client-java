@@ -19,10 +19,10 @@ registerHandler method.
 The constructor takes two arguments: a javax.websocket.WebsocketContainer, and a MessageConverter.
 
 ```java
-        DDPMessageEndpoint endpoint = new DDPMessageEndpointImpl(webSocketContainer, messageConverter);
+    DDPMessageEndpoint endpoint = new DDPMessageEndpointImpl(webSocketContainer, messageConverter);
 
-        endpoint.registerHandler(ConnectedMessage.class, message ->
-                System.out.println("connected to server! session: " + message.getSession()));
+    endpoint.registerHandler(ConnectedMessage.class, message ->
+            System.out.println("connected to server! session: " + message.getSession()));
 ```
 
 ###MessageConverter
@@ -40,16 +40,16 @@ JGroups, etc.)
 You can also extend the BaseSubscriptionAdapter to use any other local storage.  (minimongo anyone?)
 
 ```java
-        Map<String, Map<String, Object>> dataMap = new HashMap<>();
+    Map<String, Map<String, Object>> dataMap = new HashMap<>();
 
-        new MapSubscriptionAdapter(
-                endpoint,
-                new Subscription[]{
-                        new Subscription("myCollection")
-                },
-                new JsonObjectConverter(),
-                dataMap
-        );
+    new MapSubscriptionAdapter(
+            endpoint,
+            new Subscription[]{
+                    new Subscription("myCollection")
+            },
+            new JsonObjectConverter(),
+            dataMap
+    );
 ```
 
 ###ObjectConverter
