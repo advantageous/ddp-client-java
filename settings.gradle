@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include 'ddp-client', 'examples:java-fx'
+include 'ddp-client', 'examples:java-fx', 'examples:simple-subscription'
