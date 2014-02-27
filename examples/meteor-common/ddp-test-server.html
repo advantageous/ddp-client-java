@@ -1,0 +1,43 @@
+<head>
+    <title>ddp-test-server</title>
+</head>
+
+<body>
+{{> tabs}}
+{{> editTab}}
+{{> newTab}}
+</body>
+
+<template name="tabs">
+    <h1>Tabs</h1>
+    <ul>
+        {{#each tabs}}
+        <li>{{> tab}}</li>
+        {{/each}}
+    </ul>
+</template>
+
+<template name="tab">
+    <li>{{name}} - ${{total}}</li>
+</template>
+
+<template name="newTab">
+    <h1>New Tab</h1>
+
+    <form>
+        <input name="name" placeholder="Name" type="text"/>
+        <input name="total" placeholder="0.00" type="text"/>
+        <input type="submit" value="Create Tab"/>
+    </form>
+</template>
+
+<template name="editTab">
+    <h1>Edit Tab {{tab.name}}</h1>
+
+    <form>
+        <input name="_id" type="hidden" value="{{tab._id}}"/>
+        <input name="name" placeholder="Name" type="text" value="{{tab.name}}"/>
+        <input name="total" type="text" value="{{tab.total}}"/>
+        <input type="submit" value="Update Tab"/>
+    </form>
+</template>
