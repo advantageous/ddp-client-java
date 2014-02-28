@@ -1,6 +1,20 @@
 [![Build Status](https://travis-ci.org/sailorgeoffrey/ddp-client-java.png?branch=master)](https://travis-ci.org/sailorgeoffrey/ddp-client-java)
 #Meteor DDP Client for Java
 
+##Quick Start
+
+* Checkout this repo
+* Run the meteor app locally
+```
+cd examples/meteor-common
+meteor
+```
+* Build and run a sample application
+```
+gradle jar
+java -jar examples/simple-subscription/build/libs/simple-subscription-0.5.jar
+```
+
 ##Components
 
 This library can be described by breaking it into three main parts.
