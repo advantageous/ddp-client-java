@@ -3,7 +3,7 @@
 
 ##Quick Start
 
-**This project requires JDK 1.8 and Gradle**
+**Note: This project requires JDK 1.8 and Gradle**
 
 * Checkout this repo
 * Run the meteor app locally
