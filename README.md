@@ -17,6 +17,9 @@ gradle jar
 java -jar examples/simple-subscription/build/libs/simple-subscription-0.5.jar
 ```
 
+* Open a web browser and go to http://localhost:3000
+* Enjoy!
+
 ##Components
 
 This library can be described by breaking it into three main parts.
