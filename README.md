@@ -76,4 +76,4 @@ The object convert is what converts Added and Changed DDP messages into their ma
 converter is a JSON converter, but an EJSON converter would be handy in the future.
 
 ###RPCClient
-The RPC client is used to call Meteor.method functions.  The call requires callbacks for success and failure.
+The RPC client is used to call Meteor.method functions.  The call method requires callbacks for success and failure.
