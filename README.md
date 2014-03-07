@@ -3,7 +3,7 @@
 
 ##Quick Start
 
-**This project requires JDK 1.8 and Gradle**
+**Note: This project requires JDK 1.8 and Gradle**
 
 * Checkout this repo
 * Run the meteor app locally
@@ -16,6 +16,9 @@ meteor
 gradle jar
 java -jar examples/simple-subscription/build/libs/simple-subscription-0.5.jar
 ```
+
+* Open a web browser and go to http://localhost:3000
+* Enjoy!
 
 ##Components
 
@@ -73,4 +76,4 @@ The object convert is what converts Added and Changed DDP messages into their ma
 converter is a JSON converter, but an EJSON converter would be handy in the future.
 
 ###RPCClient
-The RPC client is used to call Meteor.method functions.  The call requires callbacks for success and failure.
+The RPC client is used to call Meteor.method functions.  The call method requires callbacks for success and failure.
