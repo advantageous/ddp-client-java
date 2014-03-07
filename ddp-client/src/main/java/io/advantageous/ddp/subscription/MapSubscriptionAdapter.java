@@ -44,11 +44,10 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
     @Inject
     public MapSubscriptionAdapter(final DDPMessageEndpoint endpoint,
-                                  final @Named("Subscriptions") Subscription[] subscriptions,
                                   final ObjectConverter objectConverter,
                                   final @Named("Local Data Map") Map<String, Map<String, Object>> dataMap) {
 
-        super(endpoint, subscriptions, objectConverter);
+        super(endpoint, objectConverter);
 
         this.dataMap = dataMap;
 

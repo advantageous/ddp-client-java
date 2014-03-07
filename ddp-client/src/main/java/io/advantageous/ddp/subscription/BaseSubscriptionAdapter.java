@@ -16,7 +16,6 @@
 
 package io.advantageous.ddp.subscription;
 
-import io.advantageous.ddp.ConnectedMessage;
 import io.advantageous.ddp.DDPMessageEndpoint;
 import io.advantageous.ddp.subscription.message.NoSubscriptionMessage;
 import io.advantageous.ddp.subscription.message.ReadyMessage;
@@ -47,22 +46,11 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
 
     @Inject
     public BaseSubscriptionAdapter(final DDPMessageEndpoint messageEndpoint,
-                                   final Subscription[] subscriptions,
                                    final ObjectConverter objectConverter) {
 
         this.objectConverter = objectConverter;
         this.messageEndpoint = messageEndpoint;
 
-        messageEndpoint.registerHandler(ConnectedMessage.class, message -> {
-            for (final Subscription subscription : subscriptions) {
-                try {
-                    subscribe(subscription);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new IllegalStateException(e);
-                }
-            }
-        });
         messageEndpoint.registerHandler(ReadyMessage.class, message -> {
             for (final String sub : message.getSubs()) {
                 final Subscription.Callback callback = this.callbackMap.get(sub);

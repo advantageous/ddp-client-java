@@ -17,7 +17,7 @@
 subprojects {
     apply plugin: 'java'
     group = 'io.adventageous.ddp'
-    version = '0.5.1'
+    version = '0.5.2'
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8

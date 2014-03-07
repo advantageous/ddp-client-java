@@ -17,12 +17,13 @@
 package io.advantageous.ddp.example;
 
 import io.advantageous.ddp.*;
-import org.glassfish.tyrus.client.ClientManager;
 import io.advantageous.ddp.subscription.JsonObjectConverter;
 import io.advantageous.ddp.subscription.MapSubscriptionAdapter;
 import io.advantageous.ddp.subscription.Subscription;
+import io.advantageous.ddp.subscription.SubscriptionAdapter;
 import io.advantageous.ddp.subscription.message.AddedMessage;
 import io.advantageous.ddp.subscription.message.ChangedMessage;
+import org.glassfish.tyrus.client.ClientManager;
 
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
@@ -56,14 +57,20 @@ public class SimpleSubscription {
 
         Map<String, Map<String, Object>> dataMap = new HashMap<>();
 
-        new MapSubscriptionAdapter(
+        SubscriptionAdapter adapter = new MapSubscriptionAdapter(
                 endpoint,
-                new Subscription[]{
-                        new Subscription("tabs", Tab.class)
-                },
                 new JsonObjectConverter(),
                 dataMap
         );
+
+        endpoint.registerHandler(ConnectedMessage.class, message -> {
+            try {
+                adapter.subscribe(new Subscription("tabs", Tab.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalStateException(e);
+            }
+        });
 
         endpoint.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
             Tab theNewlyAddedTab = (Tab) dataMap.get(message.getCollection()).get(message.getId());

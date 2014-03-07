@@ -17,17 +17,21 @@
 package io.advantageous.ddp.example;
 
 import com.google.inject.Guice;
+import io.advantageous.ddp.ConnectedMessage;
+import io.advantageous.ddp.DDPMessageEndpoint;
+import io.advantageous.ddp.ErrorMessage;
+import io.advantageous.ddp.subscription.Subscription;
+import io.advantageous.ddp.subscription.SubscriptionAdapter;
 import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import io.advantageous.ddp.DDPMessageEndpoint;
-import io.advantageous.ddp.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 public class SampleApplication extends Application {
 
@@ -39,9 +43,21 @@ public class SampleApplication extends Application {
     @Inject
     private MainViewController mainController;
 
+    @Inject
+    private SubscriptionAdapter adapter;
+
     {
         Guice.createInjector(new SampleApplicationModule()).injectMembers(this);
         endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.getReason()));
+        endpoint.registerHandler(ConnectedMessage.class, message -> {
+            try {
+                adapter.subscribe(new Subscription(WebApplicationConstants.TABS_COLLECTION_NAME, Tab.class)
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalStateException(e);
+            }
+        });
     }
 
     public static void main(String[] args) {

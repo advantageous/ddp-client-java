@@ -24,13 +24,16 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-import javafx.fxml.FXMLLoader;
-import org.glassfish.tyrus.client.ClientManager;
 import io.advantageous.ddp.DDPMessageEndpoint;
 import io.advantageous.ddp.DDPMessageEndpointImpl;
 import io.advantageous.ddp.JsonMessageConverter;
 import io.advantageous.ddp.MessageConverter;
-import io.advantageous.ddp.subscription.*;
+import io.advantageous.ddp.subscription.JsonObjectConverter;
+import io.advantageous.ddp.subscription.MapSubscriptionAdapter;
+import io.advantageous.ddp.subscription.ObjectConverter;
+import io.advantageous.ddp.subscription.SubscriptionAdapter;
+import javafx.fxml.FXMLLoader;
+import org.glassfish.tyrus.client.ClientManager;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -53,7 +56,7 @@ public class SampleApplicationModule extends AbstractModule {
 
         bind(MessageConverter.class).to(JsonMessageConverter.class).in(Singleton.class);
         bind(ObjectConverter.class).to(JsonObjectConverter.class).in(Singleton.class);
-        bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).asEagerSingleton();
+        bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).in(Singleton.class);
         bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class).in(Singleton.class);
         bind(SubscriptionEventDispatcher.class).asEagerSingleton();
         bind(EventBus.class).in(Singleton.class);
@@ -87,15 +90,6 @@ public class SampleApplicationModule extends AbstractModule {
     @Singleton
     WebSocketContainer provideContainer() {
         return ClientManager.createClient();
-    }
-
-    @Provides
-    @Singleton
-    @Named("Subscriptions")
-    Subscription[] provideSubscriptions() {
-        return new Subscription[]{
-                new Subscription(WebApplicationConstants.TABS_COLLECTION_NAME, Tab.class)
-        };
     }
 
     /**
