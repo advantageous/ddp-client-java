@@ -16,8 +16,8 @@
 
 subprojects {
     apply plugin: 'java'
-    group = 'org.meteor'
-    version = '0.5'
+    group = 'io.adventageous.ddp'
+    version = '0.5.1'
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -45,7 +45,7 @@ project(':ddp-client') {
 project(':examples:java-fx') {
     jar {
         manifest {
-            attributes 'Main-Class': 'org.meteor.sample.SampleApplication'
+            attributes 'Main-Class': 'io.advantageous.ddp.example.SampleApplication'
         }
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     }
@@ -62,7 +62,7 @@ project(':examples:java-fx') {
 project(':examples:simple-subscription') {
     jar {
         manifest {
-            attributes 'Main-Class': 'org.meteor.sample.SimpleSubscription'
+            attributes 'Main-Class': 'io.advantageous.ddp.example.SimpleSubscription'
         }
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     }
