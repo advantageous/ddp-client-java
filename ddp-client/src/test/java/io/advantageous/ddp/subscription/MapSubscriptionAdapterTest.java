@@ -17,13 +17,14 @@
 package io.advantageous.ddp.subscription;
 
 import io.advantageous.ddp.*;
+import io.advantageous.ddp.subscription.message.AddedMessage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import io.advantageous.ddp.subscription.message.AddedMessage;
 import org.mockito.ArgumentCaptor;
 
 import javax.websocket.*;
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,12 +71,21 @@ public class MapSubscriptionAdapterTest {
 
         final ObjectConverter converter = new JsonObjectConverter();
 
-        new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs")}, converter, localData);
+        final SubscriptionAdapter adapter = new MapSubscriptionAdapter(client, converter, localData);
 
         final Set<Object> results = new HashSet<>();
 
         client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
+        });
+
+        client.registerHandler(ConnectedMessage.class, message -> {
+            try {
+                adapter.subscribe(new Subscription("tabs", Tab.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalStateException(e);
+            }
         });
 
         client.connect("ws://example.com/websocket");
@@ -110,12 +120,21 @@ public class MapSubscriptionAdapterTest {
 
         final ObjectConverter converter = new JsonObjectConverter();
 
-        new MapSubscriptionAdapter(client, new Subscription[]{new Subscription("tabs", Tab.class)}, converter, localData);
+        final SubscriptionAdapter adapter = new MapSubscriptionAdapter(client, converter, localData);
 
         final Set<Object> results = new HashSet<>();
 
         client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
             results.add(localData.get(message.getCollection()).get(message.getId()));
+        });
+
+        client.registerHandler(ConnectedMessage.class, message -> {
+            try {
+                adapter.subscribe(new Subscription("tabs", Tab.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalStateException(e);
+            }
         });
 
         client.connect("ws://example.com/websocket");
