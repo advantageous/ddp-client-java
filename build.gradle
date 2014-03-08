@@ -16,8 +16,6 @@
 
 subprojects {
     apply plugin: 'java'
-    group = 'io.adventageous.ddp'
-    version = '0.5.2'
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -26,19 +24,89 @@ subprojects {
         mavenCentral()
     }
     dependencies {
-        testCompile "junit:junit:4.11"
-        testCompile 'org.mockito:mockito-all:1.9.5'
-
         compile "org.slf4j:slf4j-api:[1.7,1.8)"
         compile "org.slf4j:slf4j-simple:[1.7,1.8)"
     }
 }
 
 project(':ddp-client') {
+
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    group = 'io.adventageous.ddp'
+    version = '0.5.2'
+
     dependencies {
+        testCompile "junit:junit:4.11"
+        testCompile 'org.mockito:mockito-all:1.9.5'
         compile 'javax.inject:javax.inject:1'
         compile 'javax.websocket:javax.websocket-api:1.0'
         compile 'com.google.code.gson:gson:2.2.4'
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from 'build/docs/javadoc'
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    signing {
+        required false
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    try {
+                        authentication(userName: sonatypeUsername, password: sonatypePassword)
+                    } catch (MissingPropertyException ignore) {
+                    }
+                }
+
+                pom.project {
+                    name 'DDP Client for Java'
+                    packaging 'jar'
+                    description 'This is a Java client for the DDP protocol for Meteor.'
+                    url 'http://github.com/sailorgeoffrey/ddp-client-java'
+
+                    scm {
+                        url 'scm:git@github.com:sailorgeoffrey/ddp-client-java.git'
+                        connection 'scm:git@github.com:sailorgeoffrey/ddp-client-java.git'
+                        developerConnection 'scm:git@github.com:sailorgeoffrey/ddp-client-java.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'sailorgeoffrey'
+                            name 'Geoffrey Chandler'
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

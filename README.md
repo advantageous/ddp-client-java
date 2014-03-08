@@ -14,7 +14,7 @@ meteor
 * Build and run a sample application
 ```
 gradle jar
-java -jar examples/simple-subscription/build/libs/simple-subscription-0.5.2.jar
+java -jar examples/simple-subscription/build/libs/simple-subscription.jar
 ```
 
 * Open a web browser and go to http://localhost:3000
