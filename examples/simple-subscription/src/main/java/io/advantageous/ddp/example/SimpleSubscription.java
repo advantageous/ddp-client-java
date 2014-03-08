@@ -67,7 +67,6 @@ public class SimpleSubscription {
             try {
                 adapter.subscribe(new Subscription("tabs", Tab.class));
             } catch (IOException e) {
-                e.printStackTrace();
                 throw new IllegalStateException(e);
             }
         });

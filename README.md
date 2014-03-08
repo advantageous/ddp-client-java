@@ -72,7 +72,6 @@ You can also extend the BaseSubscriptionAdapter to use any other local storage. 
         try {
             adapter.subscribe(new Subscription("employees", Employee.class));
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalStateException(e);
         }
     });
