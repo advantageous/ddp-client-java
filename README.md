@@ -61,14 +61,22 @@ You can also extend the BaseSubscriptionAdapter to use any other local storage. 
 ```java
     Map<String, Map<String, Object>> dataMap = new HashMap<>();
 
-    new MapSubscriptionAdapter(
+    SubscriptionAdapter adapter = new MapSubscriptionAdapter(
             endpoint,
-            new Subscription[]{
-                    new Subscription("myCollection")
-            },
             new JsonObjectConverter(),
             dataMap
     );
+
+    // Subscribe to a collection when a connection is established
+    endpoint.registerHandler(ConnectedMessage.class, message -> {
+        try {
+            adapter.subscribe(new Subscription("employees", Employee.class));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException(e);
+        }
+    });
+
 ```
 
 ###ObjectConverter
