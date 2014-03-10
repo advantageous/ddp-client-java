@@ -34,8 +34,8 @@ project(':ddp-client') {
     apply plugin: 'maven'
     apply plugin: 'signing'
 
-    group = 'io.adventageous.ddp'
-    version = '0.5.2'
+    group = 'io.advantageous.ddp'
+    version = '0.5.3'
 
     dependencies {
         testCompile "junit:junit:4.11"
