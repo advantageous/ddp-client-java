@@ -3,7 +3,7 @@
 
 ##Quick Start
 
-**Note: This project requires JDK 1.8 and Gradle**
+**Note: This project requires JDK 1.8 and Gradle.**
 A backport to JDK 1.7 can be found in [this branch](https://github.com/sailorgeoffrey/ddp-client-java/tree/jdk7)
 
 * Checkout this repo
