@@ -19,6 +19,7 @@ package io.advantageous.ddp.example;
 import com.google.inject.Guice;
 import io.advantageous.ddp.ConnectedMessage;
 import io.advantageous.ddp.DDPMessageEndpoint;
+import io.advantageous.ddp.DDPMessageHandler;
 import io.advantageous.ddp.ErrorMessage;
 import io.advantageous.ddp.subscription.Subscription;
 import io.advantageous.ddp.subscription.SubscriptionAdapter;
@@ -48,14 +49,22 @@ public class SampleApplication extends Application {
 
     {
         Guice.createInjector(new SampleApplicationModule()).injectMembers(this);
-        endpoint.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.getReason()));
-        endpoint.registerHandler(ConnectedMessage.class, message -> {
-            try {
-                adapter.subscribe(new Subscription(WebApplicationConstants.TABS_COLLECTION_NAME, Tab.class)
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new IllegalStateException(e);
+        endpoint.registerHandler(ErrorMessage.class, new DDPMessageHandler<ErrorMessage>() {
+            @Override
+            public void onMessage(ErrorMessage message) {
+                LOGGER.error(message.getReason());
+            }
+        });
+        endpoint.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+                try {
+                    adapter.subscribe(new Subscription(WebApplicationConstants.TABS_COLLECTION_NAME, Tab.class)
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new IllegalStateException(e);
+                }
             }
         });
     }

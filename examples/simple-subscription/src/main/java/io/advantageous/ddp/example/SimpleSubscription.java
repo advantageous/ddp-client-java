@@ -51,36 +51,49 @@ public class SimpleSubscription {
 
         DDPMessageEndpoint endpoint = new DDPMessageEndpointImpl(container, messageConverter);
 
-        endpoint.registerHandler(ConnectedMessage.class, message ->
-                System.out.println("connected to server! session: " + message.getSession()));
+        endpoint.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+                System.out.println("connected to server! session: " + message.getSession());
+            }
+        });
 
 
-        Map<String, Map<String, Object>> dataMap = new HashMap<>();
+        final Map<String, Map<String, Object>> dataMap = new HashMap<>();
 
-        SubscriptionAdapter adapter = new MapSubscriptionAdapter(
+        final SubscriptionAdapter adapter = new MapSubscriptionAdapter(
                 endpoint,
                 new JsonObjectConverter(),
                 dataMap
         );
 
-        endpoint.registerHandler(ConnectedMessage.class, message -> {
-            try {
-                adapter.subscribe(new Subscription("tabs", Tab.class));
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
+        endpoint.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+                try {
+                    adapter.subscribe(new Subscription("tabs", Tab.class));
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         });
 
-        endpoint.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
-            Tab theNewlyAddedTab = (Tab) dataMap.get(message.getCollection()).get(message.getId());
-            System.out.println("Added a new tab:");
-            printTab(theNewlyAddedTab);
+        endpoint.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, new DDPMessageHandler<AddedMessage>() {
+            @Override
+            public void onMessage(AddedMessage message) {
+                Tab theNewlyAddedTab = (Tab) dataMap.get(message.getCollection()).get(message.getId());
+                System.out.println("Added a new tab:");
+                printTab(theNewlyAddedTab);
+            }
         });
 
-        endpoint.registerHandler(ChangedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
-            Tab theUpdatedTab = (Tab) dataMap.get(message.getCollection()).get(message.getId());
-            System.out.println(String.format("Tab %s was modified:", message.getId()));
-            printTab(theUpdatedTab);
+        endpoint.registerHandler(ChangedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, new DDPMessageHandler<ChangedMessage>() {
+            @Override
+            public void onMessage(ChangedMessage message) {
+                Tab theUpdatedTab = (Tab) dataMap.get(message.getCollection()).get(message.getId());
+                System.out.println(String.format("Tab %s was modified:", message.getId()));
+                printTab(theUpdatedTab);
+            }
         });
 
         try {

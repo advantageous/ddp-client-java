@@ -16,7 +16,6 @@
 
 package io.advantageous.ddp;
 
-import io.advantageous.ddp.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +46,10 @@ public class DDPMessageEndpointTest {
     @Test
     public void testRegisterHandler() throws Exception {
         DDPMessageEndpointImpl client = new DDPMessageEndpointImpl(wsContainer, null);
-        client.registerHandler(ConnectedMessage.class, message -> {
+        client.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+            }
         });
         Map<DDPMessageHandler.Phase, Set<DDPMessageHandler>> methods = client.handlerMap.get(ConnectedMessage.class);
         assertEquals(2, methods.get(DDPMessageHandler.Phase.UPDATE).size());
@@ -62,7 +64,10 @@ public class DDPMessageEndpointTest {
     public void testConnectAndDisconnect() throws Exception {
 
         final DDPMessageEndpoint client = new DDPMessageEndpointImpl(wsContainer, new JsonMessageConverter());
-        client.registerHandler(ConnectedMessage.class, message -> {
+        client.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+            }
         });
 
         client.connect(WS_URL);

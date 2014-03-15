@@ -75,16 +75,22 @@ public class MapSubscriptionAdapterTest {
 
         final Set<Object> results = new HashSet<>();
 
-        client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
-            results.add(localData.get(message.getCollection()).get(message.getId()));
+        client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, new DDPMessageHandler<AddedMessage>() {
+            @Override
+            public void onMessage(AddedMessage message) {
+                results.add(localData.get(message.getCollection()).get(message.getId()));
+            }
         });
 
-        client.registerHandler(ConnectedMessage.class, message -> {
-            try {
-                adapter.subscribe(new Subscription("tabs", Tab.class));
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new IllegalStateException(e);
+        client.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+                try {
+                    adapter.subscribe(new Subscription("tabs", Tab.class));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new IllegalStateException(e);
+                }
             }
         });
 
@@ -124,16 +130,22 @@ public class MapSubscriptionAdapterTest {
 
         final Set<Object> results = new HashSet<>();
 
-        client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, message -> {
-            results.add(localData.get(message.getCollection()).get(message.getId()));
+        client.registerHandler(AddedMessage.class, DDPMessageHandler.Phase.AFTER_UPDATE, new DDPMessageHandler<AddedMessage>() {
+            @Override
+            public void onMessage(AddedMessage message) {
+                results.add(localData.get(message.getCollection()).get(message.getId()));
+            }
         });
 
-        client.registerHandler(ConnectedMessage.class, message -> {
-            try {
-                adapter.subscribe(new Subscription("tabs", Tab.class));
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new IllegalStateException(e);
+        client.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+                try {
+                    adapter.subscribe(new Subscription("tabs", Tab.class));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new IllegalStateException(e);
+                }
             }
         });
 

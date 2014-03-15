@@ -16,13 +16,10 @@
 
 package io.advantageous.ddp.rpc;
 
+import io.advantageous.ddp.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import io.advantageous.ddp.ConnectedMessage;
-import io.advantageous.ddp.DDPMessageEndpoint;
-import io.advantageous.ddp.DDPMessageEndpointImpl;
-import io.advantageous.ddp.JsonMessageConverter;
 
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
@@ -47,23 +44,33 @@ public class RPCClientTest {
 
         final RPCClient rpcClient = new RPCClientImpl(endpoint);
 
-        endpoint.registerHandler(ConnectedMessage.class, message -> {
+        endpoint.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
 
-            MyTestClass one = new MyTestClass();
-            one.setName("First Object");
-            MyTestClass two = new MyTestClass();
-            two.setName("Second Object");
-            two.setDate(new Date());
-            MyTestClass three = new MyTestClass();
-            three.setDate(new Date());
+                MyTestClass one = new MyTestClass();
+                one.setName("First Object");
+                MyTestClass two = new MyTestClass();
+                two.setName("Second Object");
+                two.setDate(new Date());
+                MyTestClass three = new MyTestClass();
+                three.setDate(new Date());
 
-            try {
-                rpcClient.call("addTab", new Object[]{one, two, three}, result -> {
-                }, failureMessage -> {
-                    Assert.fail(failureMessage.getReason());
-                });
-            } catch (IOException e) {
-                Assert.fail(e.getMessage());
+                try {
+                    rpcClient.call("addTab", new Object[]{one, two, three}, new RPCClient.SuccessHandler<Object>() {
+                                @Override
+                                public void onSuccess(Object result) {
+                                }
+                            }, new RPCClient.FailureHandler() {
+                                @Override
+                                public void onFailure(DDPError failureMessage) {
+                                    Assert.fail(failureMessage.getReason());
+                                }
+                            }
+                    );
+                } catch (IOException e) {
+                    Assert.fail(e.getMessage());
+                }
             }
         });
 

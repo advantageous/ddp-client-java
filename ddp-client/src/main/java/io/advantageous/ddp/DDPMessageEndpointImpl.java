@@ -63,9 +63,12 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
         this.container = container;
         this.messageConverter = converter;
 
-        this.registerHandler(ConnectedMessage.class, message -> {
-            if (DEBUG) LOGGER.debug("got connected message: " + message);
-            ddpSessionId = message.getSession();
+        this.registerHandler(ConnectedMessage.class, new DDPMessageHandler<ConnectedMessage>() {
+            @Override
+            public void onMessage(ConnectedMessage message) {
+                if (DEBUG) LOGGER.debug("got connected message: " + message);
+                ddpSessionId = message.getSession();
+            }
         });
         registerErrorHandler();
         registerFailedHandler();
@@ -127,14 +130,22 @@ public class DDPMessageEndpointImpl extends Endpoint implements DDPMessageEndpoi
     }
 
     protected void registerErrorHandler() {
-        this.registerHandler(ErrorMessage.class, message -> LOGGER.error(message.toString()));
+        this.registerHandler(ErrorMessage.class, new DDPMessageHandler<ErrorMessage>() {
+            @Override
+            public void onMessage(ErrorMessage message) {
+                LOGGER.error(message.toString());
+            }
+        });
     }
 
     protected void registerFailedHandler() {
-        this.registerHandler(FailedMessage.class, message -> {
-            throw new IllegalStateException("The server does not support the DDP version specified by this " +
-                    "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
-                    DDP_PROTOCOL_VERSION);
+        this.registerHandler(FailedMessage.class, new DDPMessageHandler<FailedMessage>() {
+            @Override
+            public void onMessage(FailedMessage message) {
+                throw new IllegalStateException("The server does not support the DDP version specified by this " +
+                        "webSocketClient.  Server version: " + message.getVersion() + ", webSocketClient version: " +
+                        DDP_PROTOCOL_VERSION);
+            }
         });
     }
 

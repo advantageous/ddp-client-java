@@ -17,6 +17,7 @@
 package io.advantageous.ddp.subscription;
 
 import io.advantageous.ddp.DDPMessageEndpoint;
+import io.advantageous.ddp.DDPMessageHandler;
 import io.advantageous.ddp.subscription.message.NoSubscriptionMessage;
 import io.advantageous.ddp.subscription.message.ReadyMessage;
 import io.advantageous.ddp.subscription.message.SubscribeMessage;
@@ -51,20 +52,26 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
         this.objectConverter = objectConverter;
         this.messageEndpoint = messageEndpoint;
 
-        messageEndpoint.registerHandler(ReadyMessage.class, message -> {
-            for (final String sub : message.getSubs()) {
-                final Subscription.Callback callback = this.callbackMap.get(sub);
-                if (callback != null) {
-                    callback.onReady(sub);
-                    this.callbackMap.remove(sub);
+        messageEndpoint.registerHandler(ReadyMessage.class, new DDPMessageHandler<ReadyMessage>() {
+            @Override
+            public void onMessage(ReadyMessage message) {
+                for (final String sub : message.getSubs()) {
+                    final Subscription.Callback callback = BaseSubscriptionAdapter.this.callbackMap.get(sub);
+                    if (callback != null) {
+                        callback.onReady(sub);
+                        BaseSubscriptionAdapter.this.callbackMap.remove(sub);
+                    }
                 }
             }
         });
-        messageEndpoint.registerHandler(NoSubscriptionMessage.class, message -> {
-            final Subscription.Callback callback = this.callbackMap.get(message.getId());
-            if (callback != null) {
-                callback.onFailure(message.getId(), message.getError());
-                this.callbackMap.remove(message.getId());
+        messageEndpoint.registerHandler(NoSubscriptionMessage.class, new DDPMessageHandler<NoSubscriptionMessage>() {
+            @Override
+            public void onMessage(NoSubscriptionMessage message) {
+                final Subscription.Callback callback = BaseSubscriptionAdapter.this.callbackMap.get(message.getId());
+                if (callback != null) {
+                    callback.onFailure(message.getId(), message.getError());
+                    BaseSubscriptionAdapter.this.callbackMap.remove(message.getId());
+                }
             }
         });
 

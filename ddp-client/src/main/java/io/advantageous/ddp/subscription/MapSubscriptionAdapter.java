@@ -17,6 +17,7 @@
 package io.advantageous.ddp.subscription;
 
 import io.advantageous.ddp.DDPMessageEndpoint;
+import io.advantageous.ddp.DDPMessageHandler;
 import io.advantageous.ddp.subscription.message.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +52,36 @@ public class MapSubscriptionAdapter extends BaseSubscriptionAdapter {
 
         this.dataMap = dataMap;
 
-        endpoint.registerHandler(AddedMessage.class, this::handleAdded);
-        endpoint.registerHandler(AddedBeforeMessage.class, this::handleAddedBefore);
-        endpoint.registerHandler(ChangedMessage.class, this::handleChanged);
-        endpoint.registerHandler(MovedBeforeMessage.class, this::handleMovedBefore);
-        endpoint.registerHandler(RemovedMessage.class, this::handleRemoved);
+        endpoint.registerHandler(AddedMessage.class, new DDPMessageHandler<AddedMessage>() {
+            @Override
+            public void onMessage(AddedMessage message) {
+                handleAdded(message);
+            }
+        });
+        endpoint.registerHandler(AddedBeforeMessage.class, new DDPMessageHandler<AddedBeforeMessage>() {
+            @Override
+            public void onMessage(AddedBeforeMessage message) {
+                handleAddedBefore(message);
+            }
+        });
+        endpoint.registerHandler(ChangedMessage.class, new DDPMessageHandler<ChangedMessage>() {
+            @Override
+            public void onMessage(ChangedMessage message) {
+                handleChanged(message);
+            }
+        });
+        endpoint.registerHandler(MovedBeforeMessage.class, new DDPMessageHandler<MovedBeforeMessage>() {
+            @Override
+            public void onMessage(MovedBeforeMessage message) {
+                handleMovedBefore(message);
+            }
+        });
+        endpoint.registerHandler(RemovedMessage.class, new DDPMessageHandler<RemovedMessage>() {
+            @Override
+            public void onMessage(RemovedMessage message) {
+                handleRemoved(message);
+            }
+        });
 
     }
 

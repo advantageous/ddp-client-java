@@ -18,6 +18,7 @@ package io.advantageous.ddp.rpc;
 
 import io.advantageous.ddp.DDPError;
 import io.advantageous.ddp.DDPMessageEndpoint;
+import io.advantageous.ddp.DDPMessageHandler;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -42,29 +43,35 @@ public class RPCClientImpl implements RPCClient {
     @Inject
     public RPCClientImpl(final DDPMessageEndpoint client) {
         this.client = client;
-        this.client.registerHandler(ResultMessage.class, result -> {
-            final DeferredMethodInvocation invocation = CALLBACK_MAP.get(result.getId());
-
-            // Exit early if this message wasn't for us.
-            if (invocation == null) return;
-            final DDPError error = result.getError();
-            if (error != null) {
-                invocation.getFailureHandler().onFailure(error);
-                CALLBACK_MAP.remove(result.getId());
-                return;
-            }
-            invocation.setResult(result.getResult());
-            invocation.setHasResult(true);
-            invokeIfReady(invocation);
-        });
-        this.client.registerHandler(UpdatedMessage.class, updatedMessage -> {
-            for (String thisId : updatedMessage.getMethods()) {
-                final DeferredMethodInvocation invocation = CALLBACK_MAP.get(thisId);
+        this.client.registerHandler(ResultMessage.class, new DDPMessageHandler<ResultMessage>() {
+            @Override
+            public void onMessage(ResultMessage result) {
+                final DeferredMethodInvocation invocation = CALLBACK_MAP.get(result.getId());
 
                 // Exit early if this message wasn't for us.
-                if (invocation == null) continue;
-                invocation.setHasUpdated(true);
+                if (invocation == null) return;
+                final DDPError error = result.getError();
+                if (error != null) {
+                    invocation.getFailureHandler().onFailure(error);
+                    CALLBACK_MAP.remove(result.getId());
+                    return;
+                }
+                invocation.setResult(result.getResult());
+                invocation.setHasResult(true);
                 invokeIfReady(invocation);
+            }
+        });
+        this.client.registerHandler(UpdatedMessage.class, new DDPMessageHandler<UpdatedMessage>() {
+            @Override
+            public void onMessage(UpdatedMessage updatedMessage) {
+                for (String thisId : updatedMessage.getMethods()) {
+                    final DeferredMethodInvocation invocation = CALLBACK_MAP.get(thisId);
+
+                    // Exit early if this message wasn't for us.
+                    if (invocation == null) continue;
+                    invocation.setHasUpdated(true);
+                    invokeIfReady(invocation);
+                }
             }
         });
     }

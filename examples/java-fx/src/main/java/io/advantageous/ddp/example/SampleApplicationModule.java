@@ -72,13 +72,16 @@ public class SampleApplicationModule extends AbstractModule {
                     @Override
                     public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
                         final Presents presents = type.getRawType().getAnnotation(Presents.class);
-                        encounter.register((InjectionListener<I>) injectee -> {
-                            final FXMLLoader loader = new FXMLLoader(injectee.getClass().getResource(presents.value()));
-                            loader.setController(injectee);
-                            try {
-                                loader.load();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
+                        encounter.register((InjectionListener<I>) new InjectionListener<I>() {
+                            @Override
+                            public void afterInjection(I injectee) {
+                                final FXMLLoader loader = new FXMLLoader(injectee.getClass().getResource(presents.value()));
+                                loader.setController(injectee);
+                                try {
+                                    loader.load();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         });
                     }

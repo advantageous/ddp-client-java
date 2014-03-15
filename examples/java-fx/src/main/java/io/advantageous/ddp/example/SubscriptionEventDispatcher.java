@@ -18,6 +18,7 @@ package io.advantageous.ddp.example;
 
 import com.google.common.eventbus.EventBus;
 import io.advantageous.ddp.DDPMessageEndpoint;
+import io.advantageous.ddp.DDPMessageHandler;
 import io.advantageous.ddp.subscription.message.AddedBeforeMessage;
 import io.advantageous.ddp.subscription.message.AddedMessage;
 import io.advantageous.ddp.subscription.message.ChangedMessage;
@@ -62,10 +63,30 @@ public class SubscriptionEventDispatcher {
             }
         });
 
-        endpoint.registerHandler(AddedMessage.class, Phase.AFTER_UPDATE, this::handleAdded);
-        endpoint.registerHandler(AddedBeforeMessage.class, Phase.AFTER_UPDATE, this::handleAddedBefore);
-        endpoint.registerHandler(ChangedMessage.class, Phase.AFTER_UPDATE, this::handleChanged);
-        endpoint.registerHandler(RemovedMessage.class, Phase.AFTER_UPDATE, this::handleRemoved);
+        endpoint.registerHandler(AddedMessage.class, Phase.AFTER_UPDATE, new DDPMessageHandler<AddedMessage>() {
+            @Override
+            public void onMessage(AddedMessage message) {
+                handleAdded(message);
+            }
+        });
+        endpoint.registerHandler(AddedBeforeMessage.class, Phase.AFTER_UPDATE, new DDPMessageHandler<AddedBeforeMessage>() {
+            @Override
+            public void onMessage(AddedBeforeMessage message) {
+                handleAddedBefore(message);
+            }
+        });
+        endpoint.registerHandler(ChangedMessage.class, Phase.AFTER_UPDATE, new DDPMessageHandler<ChangedMessage>() {
+            @Override
+            public void onMessage(ChangedMessage message1) {
+                handleChanged(message1);
+            }
+        });
+        endpoint.registerHandler(RemovedMessage.class, Phase.AFTER_UPDATE, new DDPMessageHandler<RemovedMessage>() {
+            @Override
+            public void onMessage(RemovedMessage message) {
+                handleRemoved(message);
+            }
+        });
 
     }
 
