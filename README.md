@@ -3,7 +3,7 @@
 
 ##Quick Start
 
-**Note: This project requires JDK 1.8 and Gradle**
+**Note: This project requires JDK 1.7 and Gradle**
 
 * Checkout this repo
 * Run the meteor app locally
@@ -19,21 +19,6 @@ java -jar examples/simple-subscription/build/libs/simple-subscription.jar
 
 * Open a web browser and go to http://localhost:3000
 * Enjoy!
-
-##Maven/Gradle Dependency
-Release versions of this library are published to the Maven Central Repository.
-If you are using Maven, add the dependency to your pom.xml
-```xml
-    <dependency>
-        <groupId>io.advantageous.ddp</groupId>
-        <artifactId>ddp-client</artifactId>
-        <version>0.5.4</version>
-    </dependency>
-```
-If you are using Gradle
-```groovy
-    compile 'io.advantageous.ddp:ddp-client:0.5.4'
-```
 
 ##Components
 
