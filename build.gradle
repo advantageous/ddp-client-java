@@ -81,7 +81,7 @@ project(':ddp-client') {
                     name 'DDP Client for Java'
                     packaging 'jar'
                     description 'This is a Java client for the DDP protocol for Meteor.'
-                    url 'http://github.com/sailorgeoffrey/ddp-client-java'
+                    url 'http://sailorgeoffrey.github.io/ddp-client-java/'
 
                     scm {
                         url 'scm:git@github.com:sailorgeoffrey/ddp-client-java.git'
