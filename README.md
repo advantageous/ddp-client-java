@@ -27,12 +27,12 @@ If you are using Maven, add the dependency to your pom.xml
     <dependency>
         <groupId>io.advantageous.ddp</groupId>
         <artifactId>ddp-client</artifactId>
-        <version>0.5.4</version>
+        <version>1.0.0</version>
     </dependency>
 ```
 If you are using Gradle
 ```groovy
-    compile 'io.advantageous.ddp:ddp-client:0.5.4'
+    compile 'io.advantageous.ddp:ddp-client:1.0.0'
 ```
 
 ##Components

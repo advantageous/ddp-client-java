@@ -28,6 +28,10 @@ import io.advantageous.ddp.DDPMessageEndpoint;
 import io.advantageous.ddp.DDPMessageEndpointImpl;
 import io.advantageous.ddp.JsonMessageConverter;
 import io.advantageous.ddp.MessageConverter;
+import io.advantageous.ddp.repository.MeteorCollectionRepository;
+import io.advantageous.ddp.repository.MeteorCollectionRepositoryImpl;
+import io.advantageous.ddp.rpc.RPCClient;
+import io.advantageous.ddp.rpc.RPCClientImpl;
 import io.advantageous.ddp.subscription.JsonObjectConverter;
 import io.advantageous.ddp.subscription.MapSubscriptionAdapter;
 import io.advantageous.ddp.subscription.ObjectConverter;
@@ -59,6 +63,8 @@ public class SampleApplicationModule extends AbstractModule {
         bind(SubscriptionAdapter.class).to(MapSubscriptionAdapter.class).in(Singleton.class);
         bind(DDPMessageEndpoint.class).to(DDPMessageEndpointImpl.class).in(Singleton.class);
         bind(SubscriptionEventDispatcher.class).asEagerSingleton();
+        bind(MeteorCollectionRepository.class).to(MeteorCollectionRepositoryImpl.class).in(Singleton.class);
+        bind(RPCClient.class).to(RPCClientImpl.class).in(Singleton.class);
         bind(EventBus.class).in(Singleton.class);
 
         bindListener(

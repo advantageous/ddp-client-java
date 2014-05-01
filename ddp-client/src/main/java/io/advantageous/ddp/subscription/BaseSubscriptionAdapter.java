@@ -76,14 +76,14 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
         final String id = subscriptionId.toString();
         final Subscription.Callback callback = subscription.getCallback();
         if (callback != null) {
-            callbackMap.put(id, subscription.getCallback());
+            this.callbackMap.put(id, subscription.getCallback());
         }
-        objectConverter.register(subscription.getSubscriptionName(), subscription.getClazz());
+        this.objectConverter.register(subscription.getSubscriptionName(), subscription.getClazz());
         final SubscribeMessage message = new SubscribeMessage();
         message.setId(id);
         message.setName(subscription.getSubscriptionName());
         message.setParams(subscription.getParams());
-        messageEndpoint.send(message);
+        this.messageEndpoint.send(message);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class BaseSubscriptionAdapter implements SubscriptionAdapter {
         this.callbackMap.remove(subscriptionId);
         final UnsubscribeMessage message = new UnsubscribeMessage();
         message.setId(subscriptionId);
-        messageEndpoint.send(message);
+        this.messageEndpoint.send(message);
     }
 
     public ObjectConverter getObjectConverter() {

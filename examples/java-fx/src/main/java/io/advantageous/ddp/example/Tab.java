@@ -26,8 +26,6 @@ public class Tab {
 
     private String name;
 
-    private Object createdAt;
-
     private Number total;
 
     public String getName() {
@@ -36,14 +34,6 @@ public class Tab {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Object getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Object createdAt) {
-        this.createdAt = createdAt;
     }
 
     public Number getTotal() {

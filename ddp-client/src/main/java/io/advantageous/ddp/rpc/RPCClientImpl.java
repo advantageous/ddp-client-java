@@ -49,7 +49,9 @@ public class RPCClientImpl implements RPCClient {
             if (invocation == null) return;
             final DDPError error = result.getError();
             if (error != null) {
-                invocation.getFailureHandler().onFailure(error);
+                if (invocation.getFailureHandler() != null) {
+                    invocation.getFailureHandler().onFailure(error);
+                }
                 CALLBACK_MAP.remove(result.getId());
                 return;
             }
@@ -71,7 +73,9 @@ public class RPCClientImpl implements RPCClient {
 
     private static void invokeIfReady(final DeferredMethodInvocation invocation) {
         if (invocation.getHasResult() && invocation.getHasUpdated()) {
-            invocation.getSuccessHandler().onSuccess(invocation.getResult());
+            if (invocation.getSuccessHandler() != null) {
+                invocation.getSuccessHandler().onSuccess(invocation.getResult());
+            }
             CALLBACK_MAP.remove(invocation.getId());
         }
     }

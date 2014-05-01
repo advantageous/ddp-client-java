@@ -16,6 +16,9 @@
 
 package io.advantageous.ddp.example;
 
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
@@ -29,7 +32,12 @@ public class TabView extends HBox {
 
     private Tab tab;
 
-    public TabView(Tab tab) {
+    private Button deleteButton;
+
+    public TabView(final Tab tab, final EventHandler<MouseEvent> deleteHandler) {
+        this.deleteButton = new Button();
+        deleteButton.setText("delete");
+        deleteButton.addEventHandler(MouseEvent.MOUSE_CLICKED, deleteHandler);
         this.tab = tab;
         render();
     }
@@ -44,7 +52,7 @@ public class TabView extends HBox {
         this.setSpacing(10d);
         this.getChildren().add(new Text(tab.getName()));
         this.getChildren().add(new Text("$" + tab.getTotal().toString()));
-        if (tab.getCreatedAt() != null) this.getChildren().add(new Text(tab.getCreatedAt().toString()));
+        this.getChildren().add(deleteButton);
     }
 
 }

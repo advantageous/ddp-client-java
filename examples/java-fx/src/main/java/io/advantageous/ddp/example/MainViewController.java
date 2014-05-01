@@ -18,14 +18,18 @@ package io.advantageous.ddp.example;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import io.advantageous.ddp.repository.MeteorCollectionRepository;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +38,8 @@ import java.util.ResourceBundle;
 @Singleton
 @Presents("MainView.fxml")
 public class MainViewController implements Initializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
     @FXML
     private VBox scrollingVBox;
@@ -44,14 +50,26 @@ public class MainViewController implements Initializable {
     @Inject
     private EventBus eventBus;
 
+    @Inject
+    private MeteorCollectionRepository meteorCollectionRepository;
+
     private Map<String, TabView> itemMap = new HashMap<>();
 
     @Subscribe
     public void handleAdded(final TabAddedEvent event) {
         Platform.runLater(() -> {
-            final TabView view = new TabView(event.getTab());
-            itemMap.put(event.getKey(), view);
-            scrollingVBox.getChildren().add(view);
+            final TabView view = new TabView(event.getTab(), mouseEvent -> {
+                try {
+                    this.meteorCollectionRepository.delete(
+                            WebApplicationConstants.TABS_COLLECTION_NAME, event.getKey(),
+                            result -> LOGGER.info("successfully deleted item: " + result),
+                            message -> LOGGER.error("failed to delete item: " + message));
+                } catch (final IOException e) {
+                    LOGGER.error(e.getMessage());
+                }
+            });
+            this.itemMap.put(event.getKey(), view);
+            this.scrollingVBox.getChildren().add(view);
         });
     }
 
