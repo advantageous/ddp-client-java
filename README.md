@@ -1,4 +1,4 @@
-#Meteor DDP Client for Java  [![Build Status](https://travis-ci.org/sailorgeoffrey/ddp-client-java.png?branch=master)](https://travis-ci.org/sailorgeoffrey/ddp-client-java)
+#Meteor DDP Client for Java  [![Build Status](https://travis-ci.org/advantageous/ddp-client-java.png?branch=master)](https://travis-ci.org/advantageous/ddp-client-java)
 
 **"Meteor is an open-source platform for building top-quality web apps in a fraction of the time, whether you're an expert developer or just getting started."  [-Meteor Website](https://www.meteor.com/)**
 
@@ -7,7 +7,7 @@ This library allows Java developers to make clients for Meteor web applications 
 ##Quick Start
 
 **Note: This project requires JDK 1.8 and Gradle.**
-A backport to JDK 1.7 can be found in [this branch](https://github.com/sailorgeoffrey/ddp-client-java/tree/jdk7)
+A backport to JDK 1.7 can be found in [this branch](https://github.com/advantageous/ddp-client-java/tree/jdk7)
 
 * Checkout this repo
 * Run the meteor app locally
